@@ -1,0 +1,22 @@
+project:
+  name: energiewende_big_data
+  timezone: UTC 
+
+
+paths:
+  data_root = "data"
+  landing = "data/landing"
+  bronze = "data/bronze"
+  silver = "data/silver"
+  gold = "data/gold"
+  schemas = "src/config/schemas"
+
+# Parámetros globales para la descarga
+ingestion:
+  default_retry: 3 # cuántas veces reintentar si una petición falla.
+  default_timeout_s: 60 # tiempo máximo de espera por respuesta.
+# cabecera HTTPS personalizada 
+# (para que las APIS indentifiquen el script)
+  user_agent: "energiewende-ingestor/1.0" 
+
+
