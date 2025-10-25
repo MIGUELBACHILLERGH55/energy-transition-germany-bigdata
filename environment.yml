@@ -6,4 +6,9 @@ dependencies:
  - openjdk=17
  - pyspark
  - jupyterlab
+ - ipykernel #sin su instalación, aún con Jupyter instalado no podríamos ejecutar celdas con el entorno
+ - pip #añade el gestor de paquetes pip dentro del entorno -> para poder instalar dependecias que no existan en conda
+ - pip:
+  - findspark #facilita a Python la instalación de Spark evitando posibles errores comunes
+  
 
