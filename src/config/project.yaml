@@ -19,4 +19,121 @@ ingestion:
 # (para que las APIS indentifiquen el script)
   user_agent: "energiewende-ingestor/1.0" 
 
+sources:
+
+  # ============================================================
+  # SMARD (Bundesnetzagentur)
+  # ------------------------------------------------------------
+  # Datos horarios y de alta frecuencia (2017–actualidad)
+  # Proporciona: precios horarios, consumo, generación por tecnología
+  # Usado para: análisis del mercado eléctrico reciente y transición energética
+  # ============================================================
+  smard:
+    enabled: true
+    base_url: "https://www.smard.de/app/chart_data"
+    datasets:
+
+      # --- Precios de mercado (Day-Ahead) ---
+      prices:
+        filter: 410                   # ID del dataset (Market Price DE/LU)
+        region: "DE-LU"               # Región (Alemania + Luxemburgo)
+        resolution: "hour"            # Resolución temporal
+        granularity: hourly
+        tz: "Europe/Berlin"
+        landing_dir: "smard/prices"   # Carpeta donde se guardará
+        file_naming: "smard_prices_{yyyy}-{mm}-{dd}.csv"
+        schedule: "daily"
+
+      # --- Generación eléctrica por tecnología ---
+      generation:
+        filter: 4068                  # Ejemplo: energía solar fotovoltaica
+        region: "DE"
+        resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        landing_dir: "smard/generation"
+        file_naming: "smard_generation_solar_{yyyy}-{mm}-{dd}.csv"
+        schedule: "daily"
+
+    auth: null                        # No requiere token
+
+  # ============================================================
+  # OPSD (Open Power System Data)
+  # ------------------------------------------------------------
+  # Series históricas limpias (2010–actualidad)
+  # Proporciona: generación, demanda, capacidad instalada, emisiones
+  # Usado para: análisis de largo plazo y validación de SMARD
+  # ============================================================
+  opsd:
+    enabled: false
+    base_url: ""                      # (pendiente de completar)
+    datasets: {}
+    # TODO: identifica qué datasets usarás (generation, demand...)
+
+  # ============================================================
+  # DWD (Deutscher Wetterdienst)
+  # ------------------------------------------------------------
+  # Servicio meteorológico alemán
+  # Proporciona: viento, irradiación solar, temperatura, precipitación
+  # Usado para: correlación clima ↔ generación renovable / demanda
+  # ============================================================
+  dwd:
+    enabled: false
+    base_url: ""                      # (pendiente de completar)
+    datasets: {}
+    # TODO: busca endpoints o rutas FTP de observaciones diarias/mensuales
+
+  # ============================================================
+  # AG Energiebilanzen (AGEB)
+  # ------------------------------------------------------------
+  # Asociación alemana de balances energéticos
+  # Proporciona: estructura del mix y balances energéticos (1990–2010)
+  # Usado para: periodo histórico previo a OPSD
+  # ============================================================
+  ag_energiebilanzen:
+    enabled: false
+    base_url: ""                      # (pendiente de completar)
+    datasets: {}
+    # TODO: localiza archivos CSV/PDF oficiales de AGEB (balances anuales)
+
+  # ============================================================
+  # Destatis (Statistisches Bundesamt)
+  # ------------------------------------------------------------
+  # Oficina Federal de Estadística
+  # Proporciona: emisiones de CO₂ y consumo energético nacional
+  # Usado para: validación macro y coherencia con series energéticas
+  # ============================================================
+  destatis:
+    enabled: false
+    base_url: ""                      # (pendiente de completar)
+    datasets: {}
+    # TODO: identifica los códigos de tablas relevantes (GENESIS-Online)
+
+  # ============================================================
+  # IEA (International Energy Agency)
+  # ------------------------------------------------------------
+  # Agencia Internacional de la Energía
+  # Proporciona: datos energéticos y emisiones por país (OCDE/UE)
+  # Usado para: comparación internacional y benchmarking
+  # ============================================================
+  iea:
+    enabled: false
+    base_url: ""                      # (pendiente de completar)
+    datasets: {}
+    # TODO: revisa API oficial de IEA y licencias para uso educativo
+
+  # ============================================================
+  # Eurostat (European Commission)
+  # ------------------------------------------------------------
+  # Oficina de estadísticas de la Unión Europea
+  # Proporciona: balances, precios, participación renovable, emisiones
+  # Usado para: comparación con otros países europeos
+  # ============================================================
+  eurostat:
+    enabled: false
+    base_url: ""                      # (pendiente de completar)
+    datasets: {}
+    # TODO: examina el API de Eurostat (SDMX) para datasets energéticos
+
+
 
