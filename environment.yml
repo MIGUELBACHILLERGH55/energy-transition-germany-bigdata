@@ -5,4 +5,5 @@ dependencies:
  - python=3.11
  - openjdk=17
  - pyspark
+ - jupiterlab
 
