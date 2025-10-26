@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: energy-trans-env
 channels:
  - conda-forge
@@ -6,3 +7,14 @@ dependencies:
  - openjdk=17
  - pyspark
 
+=======
+name: energy-trans-env
+channels:
+ - conda-forge
+dependencies:
+ - python=3.11
+ - openjdk=17
+ - pyspark
+ - jupyterlab
+
+>>>>>>> e17a38c30a36ef1e1f2781fa1a9f9476a704f21e
