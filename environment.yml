@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-name: energy-trans-env
-channels:
- - conda-forge
-dependencies:
- - python=3.11
- - openjdk=17
- - pyspark
-
-=======
 name: energy-trans-env
 channels:
  - conda-forge
@@ -16,5 +6,9 @@ dependencies:
  - openjdk=17
  - pyspark
  - jupyterlab
+ - ipykernel #sin su instalación, aún con Jupyter instalado no podríamos ejecutar celdas con el entorno
+ - pip #añade el gestor de paquetes pip dentro del entorno -> para poder instalar dependecias que no existan en conda
+ - pip:
+  - findspark #facilita a Python la instalación de Spark evitando posibles errores comunes
+  
 
->>>>>>> e17a38c30a36ef1e1f2781fa1a9f9476a704f21e
