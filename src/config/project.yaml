@@ -2,138 +2,151 @@ project:
   name: energiewende_big_data
   timezone: UTC 
 
+active_profile: local
 
-paths:
-  data_root = "data"
-  landing = "data/landing"
-  bronze = "data/bronze"
-  silver = "data/silver"
-  gold = "data/gold"
-  schemas = "src/config/schemas"
+profiles:
+  local:
+    paths:
+      data_root: "data"
+      landing: "landing"
+      bronze: "bronze"
+      silver: "silver"
+      gold: "gold"
+      schemas: "src/config/schemas"
 
-# Parámetros globales para la descarga
-ingestion:
-  default_retry: 3 # cuántas veces reintentar si una petición falla.
-  default_timeout_s: 60 # tiempo máximo de espera por respuesta.
-# cabecera HTTPS personalizada 
-# (para que las APIS indentifiquen el script)
-  user_agent: "energiewende-ingestor/1.0" 
+    # Gloabal parameters for the download 
+    ingestion:
+      default_retry: 3 # how many times retry if the petition fails.
+      default_timeout_s: 60 # max wait time allowed per answer.
+    # custom HTTPS header.
+    # for the APIS to identify the script.
+      user_agent: "energiewende-ingestor/1.0" 
 
-sources:
+    sources:
 
-  # ============================================================
-  # SMARD (Bundesnetzagentur)
-  # ------------------------------------------------------------
-  # Datos horarios y de alta frecuencia (2017–actualidad)
-  # Proporciona: precios horarios, consumo, generación por tecnología
-  # Usado para: análisis del mercado eléctrico reciente y transición energética
-  # ============================================================
-  smard:
-    enabled: true
-    base_url: "https://www.smard.de/app/chart_data"
-    datasets:
+      # ============================================================
+      # SMARD (Bundesnetzagentur)
+      # ------------------------------------------------------------
+      # Hourly and high frequency data (2017–present)
+      # Provides: hourly prices, consumption, generation by technology
+      # Used for: analysis of the recent electricity market  and energy transition
+      # ============================================================
+      smard:
+        enabled: true
+        base_url: "https://www.smard.de/app/chart_data"
+        datasets:
 
-      # --- Precios de mercado (Day-Ahead) ---
-      prices:
-        filter: 410                   # ID del dataset (Market Price DE/LU)
-        region: "DE-LU"               # Región (Alemania + Luxemburgo)
-        resolution: "hour"            # Resolución temporal
-        granularity: hourly
-        tz: "Europe/Berlin"
-        landing_dir: "smard/prices"   # Carpeta donde se guardará
-        file_naming: "smard_prices_{yyyy}-{mm}-{dd}.csv"
-        schedule: "daily"
+          # --- Market price (Day-Ahead) ---
+          prices: # Name of the dataset within the source smard.
+            request: # API required parameters to retrieve the data.
+              filter: 4169  # Dataset id (Market Price: Germany/Luxembourg).
+              region: "DE"    # Region (Germany).
+              resolution: "hour"  # Temporal resolution (hour = data by hour).
 
-      # --- Generación eléctrica por tecnología ---
-      generation:
-        filter: 4068                  # Ejemplo: energía solar fotovoltaica
-        region: "DE"
-        resolution: "hour"
-        granularity: hourly
-        tz: "Europe/Berlin"
-        landing_dir: "smard/generation"
-        file_naming: "smard_generation_solar_{yyyy}-{mm}-{dd}.csv"
-        schedule: "daily"
+            storage: # How and where to save the downloaded files.
+              landing_dir: "smard/prices"   # Folder in data/landing in which the data would be stored.
+              file_naming: "smard_prices_{yyyy}-{mm}-{dd}.csv" # File name template.
 
-    auth: null                        # No requiere token
+            metadata: # Descriptive information and internal control.
+              dataset_id: "smard_prices_hourly" # Internal unique ID (for logs and validation).
+              source_resolution: "hour" # source frequency.
+              granularity: hourly # data processing / saving frequency. 
+              tz: "Europe/Berlin" # Original timezone of the data. 
+              schedule: "daily" # Update frequency (how often).
+          
 
-  # ============================================================
-  # OPSD (Open Power System Data)
-  # ------------------------------------------------------------
-  # Series históricas limpias (2010–actualidad)
-  # Proporciona: generación, demanda, capacidad instalada, emisiones
-  # Usado para: análisis de largo plazo y validación de SMARD
-  # ============================================================
-  opsd:
-    enabled: false
-    base_url: ""                      # (pendiente de completar)
-    datasets: {}
-    # TODO: identifica qué datasets usarás (generation, demand...)
 
-  # ============================================================
-  # DWD (Deutscher Wetterdienst)
-  # ------------------------------------------------------------
-  # Servicio meteorológico alemán
-  # Proporciona: viento, irradiación solar, temperatura, precipitación
-  # Usado para: correlación clima ↔ generación renovable / demanda
-  # ============================================================
-  dwd:
-    enabled: false
-    base_url: ""                      # (pendiente de completar)
-    datasets: {}
-    # TODO: busca endpoints o rutas FTP de observaciones diarias/mensuales
+            # --- Electricity generation by technology---
+            generation:
+              solar:
+                filter: 4068                  
+                region: "DE"
+                resolution: "hour"
+                granularity: hourly
+                tz: "Europe/Berlin"
+                landing_dir: "smard/generation"
+                file_naming: "smard_generation_solar_{yyyy}-{mm}-{dd}.csv"
+                schedule: "daily"
 
-  # ============================================================
-  # AG Energiebilanzen (AGEB)
-  # ------------------------------------------------------------
-  # Asociación alemana de balances energéticos
-  # Proporciona: estructura del mix y balances energéticos (1990–2010)
-  # Usado para: periodo histórico previo a OPSD
-  # ============================================================
-  ag_energiebilanzen:
-    enabled: false
-    base_url: ""                      # (pendiente de completar)
-    datasets: {}
-    # TODO: localiza archivos CSV/PDF oficiales de AGEB (balances anuales)
 
-  # ============================================================
-  # Destatis (Statistisches Bundesamt)
-  # ------------------------------------------------------------
-  # Oficina Federal de Estadística
-  # Proporciona: emisiones de CO₂ y consumo energético nacional
-  # Usado para: validación macro y coherencia con series energéticas
-  # ============================================================
-  destatis:
-    enabled: false
-    base_url: ""                      # (pendiente de completar)
-    datasets: {}
-    # TODO: identifica los códigos de tablas relevantes (GENESIS-Online)
+            auth: null                        
 
-  # ============================================================
-  # IEA (International Energy Agency)
-  # ------------------------------------------------------------
-  # Agencia Internacional de la Energía
-  # Proporciona: datos energéticos y emisiones por país (OCDE/UE)
-  # Usado para: comparación internacional y benchmarking
-  # ============================================================
-  iea:
-    enabled: false
-    base_url: ""                      # (pendiente de completar)
-    datasets: {}
-    # TODO: revisa API oficial de IEA y licencias para uso educativo
+          # ============================================================
+          # OPSD (Open Power System Data)
+          # ------------------------------------------------------------
+          # Clean historical series (2010–present)
+          # Provides: generation, demand, installed capacity, emissions
+          # Used for: long term analysis and SMARD validation
+          # ============================================================
+          opsd:
+            enabled: false
+            base_url: ""                      # (yet to complete)
+            datasets: {}
+            # TODO: identify which datasets to use (generation, demand).
 
-  # ============================================================
-  # Eurostat (European Commission)
-  # ------------------------------------------------------------
-  # Oficina de estadísticas de la Unión Europea
-  # Proporciona: balances, precios, participación renovable, emisiones
-  # Usado para: comparación con otros países europeos
-  # ============================================================
-  eurostat:
-    enabled: false
-    base_url: ""                      # (pendiente de completar)
-    datasets: {}
-    # TODO: examina el API de Eurostat (SDMX) para datasets energéticos
+          # ============================================================
+          # DWD (Deutscher Wetterdienst)
+          # ------------------------------------------------------------
+          # German meteorologica service 
+          # Provides: wind, solar radiation, temperature, precipitation
+          # Used for: correlation between climate and renewable generation / demand 
+          # ============================================================
+          dwd:
+            enabled: false
+            base_url: ""                      # (yet to complete)
+            datasets: {}
+            # TODO: search endpoints or routes FTP paths from daily/monthly observations.
 
+          # ============================================================
+          # AG Energiebilanzen (AGEB)
+          # ------------------------------------------------------------
+          # German Energy Balance Association
+          # Provides: Energy mix structure and balances (1990–2010)
+          # Used for: Historical period before OPSD
+          # ============================================================
+          ag_energiebilanzen:
+            enabled: false
+            base_url: ""                      # (yet to complete)
+            datasets: {}
+            # TODO: locate files official CSV/PDF of AGEB (anual balance sheet).
+
+          # ============================================================
+          # Destatis (Statistisches Bundesamt)
+          # ------------------------------------------------------------
+          # Federal Office of Statistics
+          # Provides: CO2 emissions and national energy consumption
+          # Used for: macro validation and consistency with enerergy series
+          # ============================================================
+          destatis:
+            enabled: false
+            base_url: ""                      # (yet to complete)
+            datasets: {}
+            # TODO: identify the relevant table codes GENESIS-Online).
+
+          # ============================================================
+          # IEA (International Energy Agency)
+          # ------------------------------------------------------------
+          # International Energy Agence
+          # Provides: energy and emissions data by country
+          # Used for: international comparison and benchmarking
+          # ============================================================
+          iea:
+            enabled: false
+            base_url: ""                      # (yet to complete)
+            datasets: {}
+          # TODO: Review IEA's official API and licenses for educational use
+
+          # ============================================================
+          # Eurostat (European Commission)
+          # ------------------------------------------------------------
+          # Statistical Office of the European Union
+          # Provides: balances, prices, renewable energy share, emissions
+          # Used for: comparison with other European countries
+          # ============================================================
+          eurostat:
+            enabled: false
+            base_url: ""                      # (yet to complete)
+            datasets: {}
+            # TODO: Examine the Eurostat API (SDMX) for energy datasets
 
 
