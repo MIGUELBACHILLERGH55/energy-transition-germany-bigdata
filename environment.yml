@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: energy-trans-env
 channels:
  - conda-forge
@@ -12,3 +13,13 @@ dependencies:
   - findspark #facilita a Python la instalación de Spark evitando posibles errores comunes
   
 
+=======
+name: energy-trans-env
+channels:
+ - conda-forge
+dependencies:
+ - python=3.11
+ - openjdk=17
+ - pyspark
+ - jupyterlab
+ - pandas
