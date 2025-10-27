@@ -59,18 +59,19 @@ def resolve_path(cfg, key: str):
         return (PROJECT_ROOT / root / sub).resolve()
 
 
-# Helper to fetch a source entry, e.g. get_source(cfg, "smard")
 def get_source(cfg, source_key):
     """Return a source entry from cfg['sources'] by key."""
     return cfg['sources'][source_key]
 
 
-# TODO: dataset helpers, e.g. get_dataset(cfg, "smard", "prices")
 def get_dataset(cfg, source: str, key: str):
-    """Return a dataset entry for a given source and key (to be implemented)."""
-    return cfg[source][key]
+    """Return a dataset entry for a given source and key."""
+    return cfg['sources'][source]['datasets'][key]
 
 
 # ---------------------- Quick test zone ----------------------
-cfg = load_project_yaml(YAML_ROUTE)
-print(resolve_path(cfg, 'silver'))
+if __name__ == '__main__':
+    cfg = load_project_yaml(YAML_ROUTE)
+    print(resolve_path(cfg, 'silver'))
+
+
