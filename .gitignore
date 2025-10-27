@@ -1,0 +1,14 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# PyCharm / VSCode / misc
+.idea/
+.vscode/
+
+# Local/output data (si lo quieres evitar desde ya)
+data/
