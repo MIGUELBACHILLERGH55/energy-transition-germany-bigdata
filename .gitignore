@@ -12,3 +12,6 @@ venv/
 
 # Local/output data (si lo quieres evitar desde ya)
 data/
+
+# Ignore all obsidian folders
+**/.obsidian/
