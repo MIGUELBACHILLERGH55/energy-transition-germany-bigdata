@@ -1,10 +1,16 @@
-"""
-ParsedBatch is the minimally normalized, validated data ready for landing.
+# src/extract/core/models/parsed_batch.py
 
-Fields (suggested):
-- records: list[dict] | "DataFrame"  # decoded rows (keep it generic)
-- dataset_id: str                    # same as metadata.dataset_id
-- window: tuple[start, end] | None   # time coverage of this batch
-- rows: int                          # row count after minimal cleaning
-- meta: dict | None                  # e.g., columns, dtypes, tz info
+"""
+Parsed Batch Model
+------------------
+
+Represents structured and validated data ready for persistence.
+
+Responsibilities:
+- Hold cleaned records or DataFrame-like structures.
+- Describe format ("csv", "json", "parquet") and optional schema.
+- Contain partitioning metadata for storage layout.
+
+This model is produced by ParserStrategy and consumed by StorageClient.
+It should remain lightweight and serialization-ready.
 """

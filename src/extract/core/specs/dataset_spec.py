@@ -1,8 +1,23 @@
-# DatasetSpec represents the configuration of a single *dataset* inside a source.
-#
-# - It receives the YAML fields under something like `sources.<source>.datasets.<dataset>`.
-# - It stores and validates request parameters, storage rules, metadata, schedule, etc.
-# - It is agnostic to how the data is fetched (API, FTP, local files, etc.).
-# - The Extractor will iterate over DatasetSpec instances to plan/fetch/parse/persist.
-#
-# This is also only a configuration model — not executable logic.
+# src/extract/core/specs/dataset_spec.py
+
+"""
+Batch Dataset Spec
+------------------
+
+Defines the configuration contract for a single dataset
+belonging to a batch source.
+
+Responsibilities:
+- Describe dataset-level extraction parameters (access, request, schedule, tz, format).
+- Optionally override default destinations per layer (landing, silver, gold).
+- Remain a pure configuration model — no execution or I/O logic.
+- Be fully resolved by the Loader before reaching the Extractor.
+
+This class is used within BatchSourceSpec.datasets to define
+individual extraction units.
+"""
+
+class BatchDatasetSpec:
+    """Defines one dataset belonging to a batch source."""
+    # fields like: enabled, access, request, schedule, tz, granularity, format, destinations
+    pass
