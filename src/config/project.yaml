@@ -2,40 +2,100 @@ project:
   name: energiewende_big_data
   timezone: UTC 
 
-active_profile: local
+# ======================================================================
+# Environment and storage configuration 
+# ----------------------------------------------------------------------
+# Each "environment" (local or prod) maps logical layers 
+# (bronze/silver/gold) to physical storage profiles.
+# ======================================================================
+
+# Which environment profile to activate (maps logical layer -> physical properties)
+active_env: local
+
+
+# ----------------------------------------------------------------------
+# Physical profiles (actual storage backends)
+# ----------------------------------------------------------------------
+# These define *where* data will be physically stored.
+# - "local_fs" saves data to the local file system.
+# - "s3_prod" saves data to an s3 bucket.
+# ----------------------------------------------------------------------
 
 profiles:
+  local_fs:
+    type: file
+    base_path: "data" # local folder root
+  s3_prod:
+    type: s3
+    bucket: "energiewende-prod"
+    base_path: "" # optional prefix inside the bucker
+
+
+# ----------------------------------------------------------------------
+# Map environments -> which profile each layer uses
+# ----------------------------------------------------------------------
+# In the "local" environment, all layers use the local file system.
+# In the "prod" environment, all layers write to the s3 bucket.
+# ----------------------------------------------------------------------
+
+env_profiles:
   local:
-    paths:
-      data_root: "data"
-      landing: "landing"
-      bronze: "bronze"
-      silver: "silver"
-      gold: "gold"
-      schemas: "src/config/schemas"
+    bronze: local_fs
+    silver: local_fs
+    gold: local_fs
+  prod:
+    bronze: s3_prod
+    silver: s3_prod
+    gold: s3_prod
 
-    # Gloabal parameters for the download 
-    ingestion:
-      default_retry: 3 # how many times retry if the petition fails.
-      default_timeout_s: 60 # max wait time allowed per answer.
-    # custom HTTPS header.
-    # for the APIS to identify the script.
-      user_agent: "energiewende-ingestor/1.0" 
+# ----------------------------------------------------------------------
+# Default layer definitions (used unless overridden per dataset)
+# ----------------------------------------------------------------------
+# Each logical layer has a default storage location and file format.
+# - Bronze: raw or ingest data (JSON, CSV, etc.)
+# - Silver: cleaned/structured data (Parquet)
+# - Gold: aggregated or business-ready data (Parque, partitioned)
+# ----------------------------------------------------------------------
 
+defaults:
+  bronze: 
+    profile_ref: bronze
+    path: "bronze/"
+    format: json # format in origin 
+  silver:
+    profile_ref: silver
+    path: "silver/"
+    format: parquet 
+  gold:
+    profile_ref: gold
+    path: "gold/"
+    format: parquet 
+
+# ======================================================================
+# DATA SOURCES
+# ----------------------------------------------------------------------
+# Each "source" defines a data provider (API, file, DB, etc.)
+# Each "dataset" under a source defines:
+# - How to access it (API params, file path, etc.)
+# - How to store it (file naming, destination paths, formats)
+# ======================================================================
 sources:
 
-  # ============================================================
+  # ------------------------------------------------------------
   # SMARD (Bundesnetzagentur)
   # ------------------------------------------------------------
-  # Hourly and high-frequency electricity market data (2017–present)
-  # Provides: day-ahead prices, generation by technology, consumption, etc.
+  # Provides electricity market data such as:
+  # - Day-ahead prices
+  # - Generation by technology
+  # - Consumption, etc.
+  #
   # Used for: near real-time market analysis and energy transition monitoring
   # ============================================================
   smard:
     enabled: true                     # If false, the entire source is ignored
 
     # --- Default settings for this source (can be overridden per dataset) ---
-    kind: api                        # Access type (api|file|ftp|db). Informative but useful for routing.
+    kind: api                        # Access type (api|file|ftp|db). 
     base_url: "https://www.smard.de/app/chart_data"  # Base endpoint for SMARD API calls
     headers:
       user_agent: "energiewende-ingestor/1.0"        # HTTP header to identify this client
@@ -43,7 +103,6 @@ sources:
     timeout_s: 60                    # Default timeout per request in seconds
 
     datasets:
-
       # --- Market price (Day-Ahead) ---
       prices:                        # Logical dataset name
         access: api                  # Access type (api)
@@ -52,9 +111,10 @@ sources:
           region: "DE"               # Germany
           resolution: "hour"         # Temporal resolution (hourly)
           # endpoint: ""             # Optional: override endpoint relative to base_url
-        storage:                     # How and where to store the raw files
-          landing_dir: "smard/prices"   # Folder under data/landing
-          file_naming: "smard_prices_{yyyy}-{mm}-{dd}.csv"  # Filename template
+        storage:                     
+          # The bronze (raw) Layer typically keeps data as-is
+          # so we define a date-based filename for each ingestion batch.
+          file_naming: "smard_prices_{yyyy}-{mm}-{dd}.csv" # TODO: explore output format.
         metadata:                    # Internal metadata and scheduling rules
           dataset_id: "smard.prices.hourly"        # Unique internal ID for tracking
           source_resolution: "hour"  # Frequency from source
@@ -66,15 +126,57 @@ sources:
         # retry: 5                   # Optional: override retry only for this dataset
         # timeout_s: 120             # Optional: override timeout only for this dataset
 
+        # ----------------------------------------------------------------------
+        # Destination overrides per layer
+        # ----------------------------------------------------------------------
+        # Here we explicitly define where each layer should store its data.
+        # The actual full path is resolved as:
+        #   [profile.base_path] + [destination.path]
+        #
+        # Example (in local env):
+        #   profile.base_path = "data/"
+        #   destination.path = "bronze/smard/prices"
+        #   -> data/bronze/smard/prices
+        # ----------------------------------------------------------------------
+
+        destinations:
+          bronze:
+            path: "bronze/smard/prices/"
+            # Format is inherited from defaults.bronze (json)
+          silver:
+            path: "silver/smard/prices/"
+            # format: parquet Used to override the defaults.silver.foramt if necessary
+          gold:
+            path: "silver/smard/prices_daily/"
+            format: parquet
+            partitioning: ["yyyy", "mm", "dd"] 
+            # ------------------------------------------------------------
+            # "partitioning" defines how data files are physically organized
+            # inside the storage layer (e.g., S3, local folder).
+            # It doesn't change the data itself — only the directory structure.
+            #
+            # For example, with this setting and a record dated 2025-11-08:
+            #
+            #   gold/smard/prices_daily/
+            #     └── yyyy=2025/
+            #         └── mm=11/
+            #             └── dd=08/
+            #                 └── part-0000.parquet
+            #
+            # This helps big-data engines (Spark, DuckDB, etc.) perform
+            # efficient queries — e.g. reading only one month or one day
+            # without scanning the entire dataset.
+            # ------------------------------------------------------------
+            
       # --- Electricity generation by technology: Solar ---
       generation_solar:
+        enabled: true
         access: api
         request:
           filter: 4068
           region: "DE"
           resolution: "hour"
         storage:
-          landing_dir: "smard/generation"
           file_naming: "smard_generation_solar_{yyyy}-{mm}-{dd}.csv"
         metadata:
           dataset_id: "smard.generation.solar.hourly"
@@ -83,7 +185,12 @@ sources:
           tz: "Europe/Berlin"
           schedule: daily
           format: csv
-        enabled: true
+          destinations:
+            landing:
+              path: "landing/smard/generation/"
+            silver:
+              path: "silver/smard/generation_solar/"
+              format: parquet
 
 
 
