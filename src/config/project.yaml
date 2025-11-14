@@ -96,7 +96,7 @@ sources:
 
     # --- Default settings for this source (can be overridden per dataset) ---
     kind: api                        # Access type (api|file|ftp|db). 
-    base_url: "https://www.smard.de/app/chart_data"  # Base endpoint for SMARD API calls
+    base_url: "https://www.smard.de/app/"  # Base endpoint for SMARD API calls
     headers:
       user_agent: "energiewende-ingestor/1.0"        # HTTP header to identify this client
     retry: 3                         # Default number of retries per request

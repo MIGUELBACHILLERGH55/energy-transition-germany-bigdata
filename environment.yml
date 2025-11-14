@@ -6,6 +6,5 @@ dependencies:
  - openjdk=17
  - pyspark
  - jupyterlab
- - requirements
 
 
