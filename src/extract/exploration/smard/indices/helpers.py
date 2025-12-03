@@ -15,6 +15,7 @@ def smard_indices_exploration(
     include_or_list: bool = True,
     verbose: bool = False,
     save: bool = False,
+    output_dir: Path | None = None,
 ):
     for resolution in resolutions_to_explore:
         for filter_name, filter_value in filters_to_explore.items():
@@ -38,7 +39,7 @@ def smard_indices_exploration(
             if save:
                 save_summary_to_json(
                     summary,
-                    output_dir=CURRENT_DIR / "indices_metadata_summaries",
+                    output_dir=output_dir or CURRENT_DIR / "indices_metadata_summaries",
                     file_name=f"{filter_name}_{resolution}_indices_summary.json",
                 )
 
