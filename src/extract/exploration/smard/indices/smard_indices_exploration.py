@@ -9,4 +9,4 @@ from extract.exploration.smard.constants import (
 from extract.exploration.smard.indices.helpers import smard_indices_exploration
 
 
-smard_indices_exploration(resolutions_to_explore, filters_to_explore, verbose=True)
+smard_indices_exploration(resolutions_to_explore, filters_to_explore, save=True)
