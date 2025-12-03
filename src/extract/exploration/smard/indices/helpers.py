@@ -1,10 +1,12 @@
-import os
+from pathlib import Path
 import json
 from datetime import datetime, timezone
 from ..constants import base_smard_endpoint, Endpoint
-from ..helpers import build_indices_endpoint, fetch_json
-
+from ..helpers import build_indices_endpoint, fetch_json, ts_to_datetime
+from ...helpers import save_summary_to_json
 from pprint import pprint
+
+CURRENT_DIR = Path(__file__).resolve().parent
 
 
 def smard_indices_exploration(
@@ -34,15 +36,17 @@ def smard_indices_exploration(
             )
 
             if save:
-                file_path = save_indices_summary_to_json(summary)
+                save_summary_to_json(
+                    summary,
+                    output_dir=CURRENT_DIR / "indices_metadata_summaries",
+                    file_name=f"{filter_name}_{resolution}_indices_summary.json",
+                )
 
             if verbose:
                 print(
-                    f"------- Exporing Smard Indices Endpoint: {indices_endpoint.base_endpoint} -------"
+                    f"---------- Exploring Smard Indices Series Endpoint: ------------ \n {endpoint} \n"
                 )
-                print(
-                    f"{filter_name.capitalize()} with resolution: {indices_endpoint.resolution}"
-                )
+                print(f"{filter_name} with resolution: {indices_endpoint.resolution}")
                 pprint(summary)
                 print()
 
@@ -87,8 +91,7 @@ def build_indices_summary(
         dict: A dictionary summarizing the available years, months, date range and metadata.
     """
     list_timestamps_datetime_utc = [
-        datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
-        for ts_ms in list_timestamps_ms
+        ts_to_datetime(ts_ms) for ts_ms in list_timestamps_ms
     ]
 
     available_years = [date.year for date in list_timestamps_datetime_utc]
@@ -123,27 +126,3 @@ def build_indices_summary(
         d["original_list_ms"] = list_timestamps_ms
 
     return d
-
-
-def save_indices_summary_to_json(
-    summary,
-    output_dir: str = "indices_expl_summary/",
-) -> str:
-    """Save the indices summary to JSON in the desired directory.
-
-    Args:
-        summary (dict): Well-formatted dict with indices metadata.
-        output_dir: Directory where the data will be stored.
-
-    Returns:
-        str: Full path to the saved JSON file.
-    """
-    file_name = summary["filter_name"] + "_" + summary["resolution"] + "_summary.json"
-
-    os.makedirs(output_dir, exist_ok=True)  # create the folder if it doesn't exist
-    file_path = os.path.join(output_dir, file_name)
-
-    with open(file_path, "w") as f:
-        json.dump(summary, f)
-
-    return file_path
