@@ -11,7 +11,7 @@ venv/
 .vscode/
 
 # Local/output data (si lo quieres evitar desde ya)
-data/
+data/bronze/
 
 # Ignore all obsidian folders
 **/.obsidian/
