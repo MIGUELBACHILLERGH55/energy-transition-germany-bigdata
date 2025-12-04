@@ -1,52 +1,4 @@
-# Energy Transition Germany — Big Data Project
-
-## Objetivo del proyecto
-
-Este proyecto forma parte de la **Unidad 3 — Adquisición de Datos** de la asignatura **Big Data**.
-
-El objetivo es **diseñar e implementar un proceso ETL con Apache Spark** que permita **extraer, transformar y almacenar datos energéticos reales de Alemania**, con el fin de analizar distintos aspectos de la transición energética del país.
-
-El proyecto sigue una **arquitectura lakehouse**, diferenciando claramente las fases de:
-
-* Ingesta de datos (**Landing**)
-* Materialización raw (**Bronze**)
-* Transformación limpia y estructurada (**Silver**)
-
-Las fuentes de datos utilizadas son **oficiales y públicas**, garantizando la fiabilidad del análisis.
-
----
-
-## Repositorio del proyecto
-
-Repositorio GitHub:
-
-[https://github.com/MIGUELBACHILLERGH55/energy-transition-germany-bigdata.git](https://github.com/MIGUELBACHILLERGH55/energy-transition-germany-bigdata.git)
-
-```bash
-git clone https://github.com/MIGUELBACHILLERGH55/energy-transition-germany-bigdata.git
-cd energy-transition-germany-bigdata
-```
-
----
-
-## Fuentes de datos
-
-* **SMARD.de**
-  Datos horarios de generación, demanda y precios del sistema eléctrico alemán.
-
-* **AGEB**
-  Balances energéticos históricos de Alemania (1990–2024).
-
-* **OPSD (Open Power System Data)**
-  Series temporales energéticas (2015–2020).
-
-* **EEA (European Environment Agency)**
-  Emisiones nacionales de gases de efecto invernadero (1985–2023).
-
----
-
-## Arquitectura del proyecto
-
+<<<<<<< HEAD
 ```text
 data/
 ├── landing/          # Datos originales descargados
@@ -123,10 +75,64 @@ Verificación:
 
 ```bash
 java -version
+=======
+```bash
+├── data
+│   ├── landing
+│   │   ├── smard
+│   │   │   ├── indices_metadata_summaries
+│   │   │   └── time_series_metadata_summaries
+│   │   ├── ageb
+│   │   ├── opsd
+│   │   └── eea
+└── src
+    ├── extract
+    ├── exploration
+    ├── smard
+    └── prototypes
+        └── smard_prototype_extractor.py
+```
+
+La zona _landing_ almacena los datos originales tal cual se obtienen de la fuente.
+
+---
+
+## Ejecución del extractor
+
+### 1. Crear un entorno virtual (recomendado)
+
+```bash
+python3 -m venv venv
+source venv/bin/activate   # Linux / Mac
+venv\Scripts\activate      # Windows
+```
+
+### 2. Instalar dependencias del proyecto
+
+```bash
+pip install -r requirements.txt
+```
+
+(Alternativamente, instalar manualmente: `requests`
+
+### 3. Configurar PYTHONPATH
+
+Ejecutar desde la raíz del proyecto:
+
+```bash
+export PYTHONPATH=$(pwd)/src
+```
+
+### 4. Ejecutar el extractor SMARD
+
+```bash
+python3 -m extract.exploration.smard.prototypes.smard_prototype_extractor
+>>>>>>> a65b2ed (Add final README.md with project documentation)
 ```
 
 ---
 
+<<<<<<< HEAD
 ## Instalación del entorno Python (Micromamba — recomendado)
 
 Para simplificar la instalación y reducir dependencias, se recomienda **Micromamba**, una alternativa ligera a Conda.
@@ -159,10 +165,20 @@ Se creará el entorno:
 
 ```text
 energy-trans-env
+=======
+## Salida generada
+
+Los archivos JSON se guardarán en las siguientes rutas:
+
+```
+data/landing/smard/indices_metadata_summaries/
+data/landing/smard/time_series_metadata_summaries/
+>>>>>>> a65b2ed (Add final README.md with project documentation)
 ```
 
 ---
 
+<<<<<<< HEAD
 ### 3. Activar el entorno
 
 ```bash
@@ -232,11 +248,38 @@ La exploración se realiza mediante:
 * Conversión puntual a pandas cuando es necesario
 
 Incluye estadísticas descriptivas y ejemplos de análisis temporal, cumpliendo los requisitos de la asignatura.
+=======
+## Código de extracción
+
+Archivo principal:
+
+```
+src/extract/exploration/smard/prototypes/smard_prototype_extractor.py
+```
+
+El script explora índices y extrae una muestra inicial de datos utilizando funciones internas del proyecto.
+
+---
+
+## Seguridad y cumplimiento legal
+
+| Fuente | Licencia                | Datos personales |
+| ------ | ----------------------- | ---------------- |
+| SMARD  | Datos públicos abiertos | No               |
+| AGEB   | Datos abiertos          | No               |
+| OPSD   | CC-BY                   | No               |
+| EEA    | CC-BY 4.0               | No               |
+
+- No se procesan datos personales
+- Se respeta la integridad de los datos originales
+- Los datos se almacenan en local
+>>>>>>> a65b2ed (Add final README.md with project documentation)
 
 ---
 
 ## Autores
 
+<<<<<<< HEAD
 * **Tomás Morales**
 * **Miguel Bachiller Segovia**
 
@@ -250,3 +293,12 @@ Si quieres, el siguiente paso natural sería:
 * Una **nota al evaluador** explicando por qué esto es adquisición de datos
 * Un **diagrama simple de la arquitectura ETL**
 * O una revisión final con mentalidad de tribunal (qué mirarían para bajar nota)
+=======
+- Tomás Morales
+- Miguel Bachiller Segovia
+
+Asignatura: Big Data – UA3 – Adquisición de Datos
+Curso: 2025 / 2026
+
+---
+>>>>>>> a65b2ed (Add final README.md with project documentation)
