@@ -45,10 +45,3 @@ class BatchTransformerPipeline:
             df = self.read_bronze(bronze_path)
             df2 = self.apply_steps(ds_name, df)
             self.write_silver(ds_name, df2)
-
-
-opsd_source = config.sources["opsd"]
-
-spark_session = SparkSession.builder.getOrCreate()
-btp = BatchTransformerPipeline(spark_session, config.project_config, opsd_source)
-btp.run()
