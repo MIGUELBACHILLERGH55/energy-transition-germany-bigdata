@@ -99,12 +99,7 @@ class OpsdTransformerPipeline(BatchTransformerPipeline):
                 *[c for c in df.columns if c not in {"event_date_utc", "event_ts_utc"}],
             ).show(truncate=False)
 
-    def run(self) -> None:
-        bronze_paths = self.read_bronze_paths()
-
-        for ds_name, bronze_path in bronze_paths.items():
-            df = self.read_bronze(bronze_path)
-            df2 = self.apply_steps(ds_name, df)
+        return df
 
 
 if __name__ == "__main__":

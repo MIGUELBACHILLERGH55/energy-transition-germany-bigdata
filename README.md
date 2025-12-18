@@ -8,9 +8,9 @@ El objetivo principal es **diseñar e implementar un proceso ETL con Apache Spar
 
 El proyecto sigue una **arquitectura lakehouse**, separando claramente las fases de:
 
-* **Ingesta de datos (Landing)**
-* **Materialización raw (Bronze)**
-* **Transformación limpia y estructurada (Silver)**
+- **Ingesta de datos (Landing)**
+- **Materialización raw (Bronze)**
+- **Transformación limpia y estructurada (Silver)**
 
 Las fuentes de datos utilizadas son **oficiales y públicas**, garantizando la fiabilidad del análisis.
 
@@ -20,16 +20,16 @@ Las fuentes de datos utilizadas son **oficiales y públicas**, garantizando la f
 
 Las fuentes utilizadas en el proyecto son:
 
-* **SMARD.de**
+- **SMARD.de**
   Datos horarios de generación, demanda y precios del sistema eléctrico alemán.
 
-* **AGEB**
+- **AGEB**
   Balances energéticos históricos de Alemania (1990–2024).
 
-* **OPSD (Open Power System Data)**
+- **OPSD (Open Power System Data)**
   Series temporales energéticas (2015–2020).
 
-* **EEA (European Environment Agency)**
+- **EEA (European Environment Agency)**
   Emisiones nacionales de gases de efecto invernadero (1985–2023).
 
 ---
@@ -53,27 +53,26 @@ data/
 
 ### Capas del lakehouse
 
-* **Landing**
+- **Landing**
   Datos originales en formatos CSV, Excel o JSON.
 
-* **Bronze**
+- **Bronze**
   Datos leídos con Spark y almacenados en formato Parquet, sin aplicar lógica de negocio.
 
-* **Silver**
+- **Silver**
   Datos transformados:
-
-  * Tipos de datos correctos
-  * Timestamps normalizados
-  * Columnas limpias y estructuradas
+  - Tipos de datos correctos
+  - Timestamps normalizados
+  - Columnas limpias y estructuradas
 
 ---
 
 ## Requisitos del sistema
 
-* Sistema operativo: Windows, macOS o Linux
-* Acceso a internet
-* **Java 11 o superior** (recomendado Java 17)
-* **Conda / Miniforge**
+- Sistema operativo: Windows, macOS o Linux
+- Acceso a internet
+- **Java 11 o superior** (recomendado Java 17)
+- **Conda / Miniforge**
 
 ### Verificación rápida de Java
 
@@ -177,9 +176,9 @@ data/silver/opsd/timeseries_hourly/
 
 Durante la ejecución se muestran por consola:
 
-* Ejemplos de datos (`df.show()`)
-* Esquema del DataFrame (`df.printSchema()`)
-* Validaciones básicas del proceso ETL
+- Ejemplos de datos (`df.show()`)
+- Esquema del DataFrame (`df.printSchema()`)
+- Validaciones básicas del proceso ETL
 
 ---
 
@@ -189,8 +188,8 @@ La exploración de los datos se realiza utilizando **Spark** y, en algunos casos
 
 Se incluyen:
 
-* Estadísticas descriptivas
-* Ejemplos de análisis temporal
+- Estadísticas descriptivas
+- Ejemplos de análisis temporal
 
 Todo ello para cumplir con los requisitos de exploración establecidos en el enunciado.
 
@@ -198,9 +197,8 @@ Todo ello para cumplir con los requisitos de exploración establecidos en el enu
 
 ## Autores
 
-* **Tomás Morales**
-* **Miguel Bachiller Segovia**
+- **Tomás Morales**
+- **Miguel Bachiller Segovia**
 
 **Asignatura:** Big Data — Unidad 3 — Adquisición de Datos
 **Curso:** 2025 / 2026
-
