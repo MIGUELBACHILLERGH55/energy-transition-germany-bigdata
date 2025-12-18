@@ -1,120 +1,206 @@
-# README — Energy Transition Germany (Big Data Project)
+# Energy Transition Germany — Big Data Project
 
 ## Objetivo del proyecto
 
-Este proyecto forma parte de la Unidad 3 — Adquisición de datos en Big Data.
-El objetivo es extraer y organizar datos energéticos reales de Alemania para analizar la transición energética del país.
+Este proyecto forma parte de la **Unidad 3 — Adquisición de Datos** de la asignatura **Big Data**.
 
-Se han utilizado dispositivos virtuales de adquisición de datos (fuentes oficiales y públicas):
+El objetivo principal es **diseñar e implementar un proceso ETL con Apache Spark**, capaz de **extraer, transformar y almacenar datos energéticos reales de Alemania** para analizar distintos aspectos de la transición energética del país.
 
-- **SMARD.de** → datos horarios de generación, demanda y precios del sistema eléctrico en Alemania
-- **AGEB** → balances energéticos históricos (1990–2024)
-- **OPSD** → series temporales energéticas 2015–2020
-- **EEA** → emisiones nacionales de gases de efecto invernadero (1985–2023)
+El proyecto sigue una **arquitectura lakehouse**, separando claramente las fases de:
+
+* **Ingesta de datos (Landing)**
+* **Materialización raw (Bronze)**
+* **Transformación limpia y estructurada (Silver)**
+
+Las fuentes de datos utilizadas son **oficiales y públicas**, garantizando la fiabilidad del análisis.
+
+---
+
+## Fuentes de datos
+
+Las fuentes utilizadas en el proyecto son:
+
+* **SMARD.de**
+  Datos horarios de generación, demanda y precios del sistema eléctrico alemán.
+
+* **AGEB**
+  Balances energéticos históricos de Alemania (1990–2024).
+
+* **OPSD (Open Power System Data)**
+  Series temporales energéticas (2015–2020).
+
+* **EEA (European Environment Agency)**
+  Emisiones nacionales de gases de efecto invernadero (1985–2023).
 
 ---
 
 ## Arquitectura del proyecto
 
-```bash
-├── data
-│   ├── landing
-│   │   ├── smard
-│   │   │   ├── indices_metadata_summaries
-│   │   │   └── time_series_metadata_summaries
-│   │   ├── ageb
-│   │   ├── opsd
-│   │   └── eea
-└── src
-    ├── extract
-    ├── exploration
-    ├── smard
-    └── prototypes
-        └── smard_prototype_extractor.py
+La arquitectura está organizada por capas siguiendo buenas prácticas en Big Data:
+
+```text
+data/
+├── landing/          # Datos originales tal y como se descargan
+│   ├── smard/
+│   ├── ageb/
+│   ├── opsd/
+│   └── eea/
+├── bronze/           # Datos raw materializados en Parquet (Spark)
+│   └── opsd/
+├── silver/           # Datos limpios, tipados y enriquecidos
+│   └── opsd/
 ```
 
-La zona _landing_ almacena los datos originales tal cual se obtienen de la fuente.
+### Capas del lakehouse
+
+* **Landing**
+  Datos originales en formatos CSV, Excel o JSON.
+
+* **Bronze**
+  Datos leídos con Spark y almacenados en formato Parquet, sin aplicar lógica de negocio.
+
+* **Silver**
+  Datos transformados:
+
+  * Tipos de datos correctos
+  * Timestamps normalizados
+  * Columnas limpias y estructuradas
 
 ---
 
-## Ejecución del extractor
+## Requisitos del sistema
 
-### 1. Crear un entorno virtual (recomendado)
+* Sistema operativo: Windows, macOS o Linux
+* Acceso a internet
+* **Java 11 o superior** (recomendado Java 17)
+* **Conda / Miniforge**
 
-```bash
-python3 -m venv venv
-source venv/bin/activate   # Linux / Mac
-venv\Scripts\activate      # Windows
-```
-
-### 2. Instalar dependencias del proyecto
+### Verificación rápida de Java
 
 ```bash
-pip install -r requirements.txt
-```
-
-(Alternativamente, instalar manualmente: `requests`
-
-### 3. Configurar PYTHONPATH
-
-Ejecutar desde la raíz del proyecto:
-
-```bash
-export PYTHONPATH=$(pwd)/src
-```
-
-### 4. Ejecutar el extractor SMARD
-
-```bash
-python3 -m extract.exploration.smard.prototypes.smard_prototype_extractor
+java -version
 ```
 
 ---
 
-## Salida generada
+## Instalación del entorno
 
-Los archivos JSON se guardarán en las siguientes rutas:
+### 1. Instalar Miniforge
 
-```
-data/landing/smard/indices_metadata_summaries/
-data/landing/smard/time_series_metadata_summaries/
+Descargar e instalar Miniforge desde:
+
+[https://github.com/conda-forge/miniforge](https://github.com/conda-forge/miniforge)
+
+Durante la instalación, aceptar las opciones por defecto.
+
+---
+
+### 2. Clonar el repositorio y abrir una terminal
+
+```bash
+cd energy-transition-germany-bigdata
 ```
 
 ---
 
-## Código de extracción
+### 3. Crear el entorno Conda
 
-Archivo principal:
+Desde la raíz del proyecto:
 
+```bash
+conda env create -f environment.yml
 ```
-src/extract/exploration/smard/prototypes/smard_prototype_extractor.py
-```
 
-El script explora índices y extrae una muestra inicial de datos utilizando funciones internas del proyecto.
+Esto creará el entorno `energy-trans-env` con todas las dependencias necesarias.
 
 ---
 
-## Seguridad y cumplimiento legal
+### 4. Activar el entorno
 
-| Fuente | Licencia                | Datos personales |
-| ------ | ----------------------- | ---------------- |
-| SMARD  | Datos públicos abiertos | No               |
-| AGEB   | Datos abiertos          | No               |
-| OPSD   | CC-BY                   | No               |
-| EEA    | CC-BY 4.0               | No               |
+```bash
+conda activate energy-trans-env
+```
 
-- No se procesan datos personales
-- Se respeta la integridad de los datos originales
-- Los datos se almacenan en local
+---
+
+## Ejecución del pipeline OPSD (Spark ETL)
+
+### Preparar los datos de entrada
+
+El pipeline asume que los ficheros de OPSD se encuentran en:
+
+```text
+data/landing/opsd/
+```
+
+Ejemplo:
+
+```text
+data/landing/opsd/time_series_60min_singleindex.csv
+```
+
+El pipeline admite **uno o varios ficheros** dentro de esta carpeta.
+
+---
+
+### Ejecutar el pipeline
+
+El pipeline de transformación de OPSD se encuentra en:
+
+```text
+src/transform/sources/opsd/pipeline.py
+```
+
+Para ejecutarlo:
+
+```bash
+python -m src.transform.sources.opsd.pipeline
+```
+
+---
+
+## Resultados generados
+
+Tras la ejecución se generan datasets en formato **Parquet**, siguiendo el comportamiento estándar de Spark (directorios con ficheros `part-*`).
+
+### Bronze
+
+```text
+data/bronze/opsd/timeseries_raw/
+```
+
+### Silver
+
+```text
+data/silver/opsd/timeseries_hourly/
+```
+
+Durante la ejecución se muestran por consola:
+
+* Ejemplos de datos (`df.show()`)
+* Esquema del DataFrame (`df.printSchema()`)
+* Validaciones básicas del proceso ETL
+
+---
+
+## Visualización y exploración
+
+La exploración de los datos se realiza utilizando **Spark** y, en algunos casos, conversión a **pandas** para visualización básica.
+
+Se incluyen:
+
+* Estadísticas descriptivas
+* Ejemplos de análisis temporal
+
+Todo ello para cumplir con los requisitos de exploración establecidos en el enunciado.
 
 ---
 
 ## Autores
 
-- Tomás Morales
-- Miguel Bachiller Segovia
+* **Tomás Morales**
+* **Miguel Bachiller Segovia**
 
-Asignatura: Big Data – UA3 – Adquisición de Datos
-Curso: 2025 / 2026
+**Asignatura:** Big Data — Unidad 3 — Adquisición de Datos
+**Curso:** 2025 / 2026
 
----
