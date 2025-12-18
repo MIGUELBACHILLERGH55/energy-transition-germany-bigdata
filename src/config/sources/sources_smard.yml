@@ -1,0 +1,336 @@
+# ------------------------------------------------------------
+# SMARD (Bundesnetzagentur) — Electricity Market Data
+# ------------------------------------------------------------
+# This source provides near–real-time electricity system data:
+#   • Day-ahead market prices
+#   • Generation by technology (solar, wind, gas, coal, etc.)
+#   • Consumption and other grid indicators
+#
+# Rationale:
+# SMARD acts as the "real-time sensor" of the project. All datasets follow
+# the same ingestion pattern (API request → raw JSON → bronze/silver/gold),
+# so the first dataset is documented thoroughly and the others inherit the logic.
+# ============================================================
+smard:
+  enabled: true # Entire SMARD source can be toggled on/off.
+  kind: api # Access type for this provider (api|file|db|ftp).
+  base_url: "https://www.smard.de/app/" # Root endpoint for all dataset requests.
+  availability_lag_days: 3
+  headers:
+    user_agent: "energiewende-ingestor/1.0" # Identifies our client in HTTP requests.
+  retry: 3 # Default retry logic for failed API calls.
+  timeout_s: 60 # Default timeout (seconds) for API calls.
+
+  datasets:
+    # --------------------------------------------------------
+    # Day-Ahead Market Prices (Hourly)
+    # --------------------------------------------------------
+    # This example is fully commented to illustrate the schema.
+    # All other SMARD datasets follow the same structure.
+    prices:
+      enabled: true
+      access: api # Dataset-specific access type (inherits from source.kind)
+      request:
+        filter: 4169 # SMARD internal dataset ID (Day-Ahead Prices)
+        region: "DE" # Germany (DE-wide aggregation)
+        resolution: "hour" # Hourly time resolution
+        # endpoint: ""       # Optional: override SMARD default endpoint
+      storage:
+        file_naming: "smard_prices_{yyyy}-{mm}-{dd}.json" # Naming for bronze/raw files
+        format: "json"
+      metadata:
+        dataset_id: "smard.prices.hourly" # Internal canonical ID for lineage tracking
+        source_resolution: "hour"
+        granularity: hourly # Target processing frequency
+        tz: "Europe/Berlin" # Source timezone
+        schedule: daily # Expected update frequency
+        format: json
+      destinations:
+        bronze:
+          path: "smard/prices/" # Where raw JSON is stored (data/bronze/ + this)
+        silver:
+          path: "smard/prices/" # Cleaned/structured version
+        gold:
+          path: "smard/prices_daily/" # Aggregated daily parquet
+          format: parquet
+          partitioning: ["yyyy", "mm", "dd"] # Hive-style directory partitioning
+
+    # ==========================
+    # Generation by technology
+    # ==========================
+    lignite:
+      enabled: true
+      access: api
+      request:
+        filter: 1223
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_lignite_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.lignite.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/lignite/"
+        silver:
+          path: "smard/generation/lignite/"
+          format: parquet
+
+    nuclear_energy:
+      enabled: true
+      access: api
+      request:
+        filter: 1224
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_nuclear_energy_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.nuclear_energy.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/nuclear_energy/"
+        silver:
+          path: "smard/generation/nuclear_energy/"
+          format: parquet
+
+    wind_offshore:
+      enabled: true
+      access: api
+      request:
+        filter: 1225
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_wind_offshore_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.wind_offshore.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/wind_offshore/"
+        silver:
+          path: "smard/generation/wind_offshore/"
+          format: parquet
+
+    hydroelectricity:
+      enabled: true
+      access: api
+      request:
+        filter: 1226
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_hydroelectricity_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.hydroelectricity.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/hydroelectricity/"
+        silver:
+          path: "smard/generation/hydroelectricity/"
+          format: parquet
+
+    other_conventional:
+      enabled: true
+      access: api
+      request:
+        filter: 1227
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_other_conventional_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.other_conventional.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/other_conventional/"
+        silver:
+          path: "smard/generation/other_conventional/"
+          format: parquet
+
+    other_renewables:
+      enabled: true
+      access: api
+      request:
+        filter: 1228
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_other_renewables_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.other_renewables.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/other_renewables/"
+        silver:
+          path: "smard/generation/other_renewables/"
+          format: parquet
+
+    biomass:
+      enabled: true
+      access: api
+      request:
+        filter: 4066
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_biomass_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.biomass.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/biomass/"
+        silver:
+          path: "smard/generation/biomass/"
+          format: parquet
+
+    wind_onshore:
+      enabled: true
+      access: api
+      request:
+        filter: 4067
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_wind_onshore_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.wind_onshore.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/wind_onshore/"
+        silver:
+          path: "smard/generation/wind_onshore/"
+          format: parquet
+
+    # Solar PV
+    photovoltaics:
+      enabled: true
+      access: api
+      request:
+        filter: 4068
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_photovoltaics_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.photovoltaics.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/photovoltaics/"
+        silver:
+          path: "smard/generation/photovoltaics/"
+          format: parquet
+
+    hard_coal:
+      enabled: true
+      access: api
+      request:
+        filter: 4069
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_hard_coal_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.hard_coal.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/hard_coal/"
+        silver:
+          path: "smard/generation/hard_coal/"
+          format: parquet
+
+    pumped_storage:
+      enabled: true
+      access: api
+      request:
+        filter: 4070
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_pumped_storage_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.pumped_storage.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/pumped_storage/"
+        silver:
+          path: "smard/generation/pumped_storage/"
+          format: parquet
+
+    natural_gas:
+      enabled: true
+      access: api
+      request:
+        filter: 4071
+        region: "DE"
+        resolution: "hour"
+      storage:
+        file_naming: "smard_natural_gas_{yyyy}-{mm}-{dd}.json"
+      metadata:
+        dataset_id: "smard.generation.natural_gas.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+        format: json
+      destinations:
+        bronze:
+          path: "smard/generation/natural_gas/"
+        silver:
+          path: "smard/generation/natural_gas/"
+          format: parquet

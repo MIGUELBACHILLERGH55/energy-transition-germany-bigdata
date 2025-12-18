@@ -1,0 +1,76 @@
+project:
+  name: energiewende_big_data
+  timezone: UTC
+
+# ======================================================================
+# Environment and storage configuration
+# ----------------------------------------------------------------------
+# Each "environment" (local or prod) maps logical layers
+# (bronze/silver/gold) to physical storage profiles.
+# ======================================================================
+
+# Which environment profile to activate (maps logical layer -> physical properties)
+active_env: local
+
+# ----------------------------------------------------------------------
+# Physical profiles (actual storage backends)
+# ----------------------------------------------------------------------
+# These define *where* data will be physically stored.
+# - "local_fs" saves data to the local file system.
+# - "s3_prod" saves data to an s3 bucket.
+# ----------------------------------------------------------------------
+
+profiles:
+  local_fs:
+    type: file
+    base_path: "data" # local folder root
+  s3_prod:
+    type: s3
+    bucket: "energiewende-prod"
+    base_path: "data" # optional prefix inside the bucker
+
+# ----------------------------------------------------------------------
+# Map environments -> which profile each layer uses
+# ----------------------------------------------------------------------
+# In the "local" environment, all layers use the local file system.
+# In the "prod" environment, all layers write to the s3 bucket.
+# ----------------------------------------------------------------------
+
+env_profiles:
+  local:
+    landing: local_fs
+    bronze: local_fs
+    silver: local_fs
+    gold: local_fs
+  prod:
+    landing: s3_prod
+    bronze: s3_prod
+    silver: s3_prod
+    gold: s3_prod
+
+# ----------------------------------------------------------------------
+# Default layer definitions (used unless overridden per dataset)
+# ----------------------------------------------------------------------
+# Each logical layer has a default storage location and file format.
+# - Bronze: raw or ingest data (JSON, CSV, etc.)
+# - Silver: cleaned/structured data (Parquet)
+# - Gold: aggregated or business-ready data (Parque, partitioned)
+# ----------------------------------------------------------------------
+
+defaults:
+  landing:
+    profile_ref: landing
+    path: "landing/"
+    format: "raw"
+  bronze:
+    profile_ref: bronze
+    path: "bronze/"
+    format: json # format in origin
+  silver:
+    profile_ref: silver
+    path: "silver/"
+    format: parquet
+  gold:
+    profile_ref: gold
+    path: "gold/"
+    format: parquet
