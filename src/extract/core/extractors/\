@@ -1,0 +1,23 @@
+from pyspark.sql import SparkSession
+from src.config.models.project_models import ProjectConfig, PlanItem
+from src.io.path_resolver import resolve_input_path, resolve_output_path
+
+
+class FileExtractor:
+    def __init__(
+        self,
+        spark_session: SparkSession,
+        project_config: ProjectConfig,
+        dataset_name: str | None = None,
+        mode: str = "overwrite",
+    ):
+        self.spark_session = spark_session
+        self.project_config = project_config
+        self.dataset_name = dataset_name
+        self.mode = mode
+
+    def plan(self) -> list[PlanItem]:
+        if self.dataset_name:
+            pass
+            # only process one dataset
+            #

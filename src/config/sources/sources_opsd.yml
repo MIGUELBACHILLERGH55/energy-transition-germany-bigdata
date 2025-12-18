@@ -1,0 +1,75 @@
+# ------------------------------------------------------------
+# OPSD — Open Power System Data (Time Series Package)
+# ------------------------------------------------------------
+# This source provides harmonized electricity system time series
+# across Europe, including:
+#   • Load (total electricity demand)
+#   • Day-ahead spot prices
+#   • Wind & solar power generation
+#   • Installed generation capacities
+#
+# Rationale:
+# OPSD offers a clean, well-documented dataset derived from
+# ENTSO-E Transparency, making it ideal for validation and
+# long-term historical analysis.
+#
+# In this project, OPSD is treated as a FILE-based source:
+# the data has already been downloaded manually as a CSV file
+# (Germany-only subset) and stored under the bronze layer.
+# ============================================================
+
+opsd:
+  enabled: true
+  kind: file # File-based source (no API calls involved)
+
+  datasets:
+    germany_timeseries:
+      enabled: true
+      access: file # Dataset is read from local files
+
+      storage:
+        # INPUT location:
+        # Path to the raw OPSD CSV file as downloaded from the OPSD website.
+        # This path is relative to the project data root (e.g. <PROJECT_ROOT>/data).
+        #
+        # The ingestion step will READ from this file and materialise
+        # a curated copy into the bronze layer.
+        path: "opsd/"
+        format: csv
+        file_name: "time_series_60min_DE_2015_2024.csv"
+
+      metadata:
+        dataset_id: "opsd.timeseries.germany.hourly"
+        description: >
+          OPSD hourly time series for Germany, including electricity load,
+          prices, wind and solar generation, and installed capacities.
+          Extracted from the official OPSD Time Series Package.
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: manual # Data is updated manually, not on a fixed schedule
+        format: csv # Source format (as provided by OPSD)
+
+      destinations:
+        bronze:
+          # OUTPUT location (bronze layer):
+          # Raw-but-structured copy of the OPSD data written by the pipeline.
+          # The actual physical path will be:
+          #   <layer_root>/opsd/timeseries_raw/
+          path: "opsd/timeseries_raw/"
+          format: parquet
+
+        silver:
+          # OUTPUT location (silver layer):
+          # Cleaned and normalised hourly time series
+          # (fixed schema, proper types, cleaned column names).
+          path: "opsd/timeseries_hourly/"
+          format: parquet
+
+        gold:
+          # OUTPUT location (gold layer):
+          # Daily aggregates derived from the hourly data
+          # (e.g. total load per day, average prices, etc.).
+          path: "opsd/timeseries_daily/"
+          format: parquet
+          partitioning: ["yyyy", "mm", "dd"]

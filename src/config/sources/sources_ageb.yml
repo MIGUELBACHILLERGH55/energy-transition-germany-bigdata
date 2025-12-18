@@ -1,0 +1,92 @@
+ageb:
+  # ------------------------------------------------------------
+  # AG Energiebilanzen — National Energy Balance (Germany)
+  # ------------------------------------------------------------
+  # This source is file-based: Excel workbooks manually downloaded
+  # from AGEB and stored under data/landing/ageb.
+  #
+  # It is used to reconstruct long-term energy balances
+  # (production, trade, transformation, final consumption, etc.)
+  # from 1990/2000 onwards.
+  # ------------------------------------------------------------
+  enabled: true
+  kind: file # Access type: local files, not an API.
+
+  datasets:
+    # --------------------------------------------------------
+    # Annual Energy Balance Workbooks (Energy Balance 2000–2030)
+    # --------------------------------------------------------
+    energy_balance_annual:
+      enabled: true
+      access: file
+
+      # Raw files as downloaded from AGEB.
+      # With base_path = "data", this becomes:
+      #   data/landing/ageb/energy_balance_2000.xls
+      #   data/landing/ageb/energy_balance_2001.xls
+      #   ...
+      storage:
+        path: "ageb/"
+        format: excel #  ingestion code will read all matching workbooks.
+        pattern: "energy_balance_*.xls*"
+
+      metadata:
+        dataset_id: "ageb.energy_balance.annual"
+        description: "Annual energy balance workbooks for Germany (Energy Balance 2000–2030)."
+        country: "DE"
+        unit: "PJ / ktoe (depending on table)"
+        source_resolution: "year"
+        granularity: yearly
+        tz: "UTC"
+        schedule: ad_hoc # Updated when new AGEB releases are downloaded
+        format: excel
+
+      destinations:
+        broze:
+          # One row per (year, carrier, sector) after flattening all Excel files.
+          path: "ageb/energy_balance_raw/"
+          format: parquet
+        silver:
+          # Cleaned, normalised table ready for joins with OPSD/EEA.
+          path: "ageb/energy_balance_by_sector/"
+          format: parquet
+        gold:
+          # High-level aggregates (e.g. total primary energy, RES share, etc.).
+          path: "ageb/energy_balance_aggregated/"
+          format: parquet
+
+    # --------------------------------------------------------
+    # Evaluation Tables (Evaluation Tables on the Energy Balance)
+    # --------------------------------------------------------
+    evaluation_tables:
+      enabled: true
+      access: file
+
+      # Aggregated time series from AGEB evaluation tables.
+      # e.g. data/landing/ageb/evaluation_tables.xlsx
+      storage:
+        path: "ageb/"
+        format: excel
+        file_name: "evaluation_tables.xlsx"
+
+      metadata:
+        dataset_id: "ageb.energy_balance.evaluation_tables"
+        description: "Evaluation tables with aggregated energy statistics for Germany (1990–2024)."
+        country: "DE"
+        unit: "PJ / %, coal-equivalent"
+        source_resolution: "year"
+        granularity: yearly
+        tz: "UTC"
+        schedule: ad_hoc
+        format: excel
+
+      destinations:
+        bronze:
+          path: "ageb/evaluation_tables_raw/"
+          format: parquet
+        silver:
+          path: "ageb/evaluation_tables_normalised/"
+          format: parquet
+        gold:
+          path: "ageb/evaluation_tables_indicators/"
+          format: parquet

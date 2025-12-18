@@ -1,0 +1,51 @@
+eea:
+  # ------------------------------------------------------------
+  # EEA — National GHG Emissions (UNFCCC inventory)
+  # ------------------------------------------------------------
+  # This source is not an API. The dataset is manually downloaded
+  # from the EEA Datahub and stored as a CSV file inside `data/landing/eea`.
+  # The ingestion step reads that CSV and materialises curated versions
+  # in the landing/silver/gold layers.
+  # ------------------------------------------------------------
+  enabled: true
+  kind: file # Access type: local file instead of HTTP API.
+
+  datasets:
+    ghg_inventory:
+      enabled: true
+      access: file # Dataset-level access type (file-based)
+
+      # Where the raw CSV lives, relative to the project data root.
+      # With base_path = "data", this becomes:
+      #   data/landing/eea/UNFCCC_v28.csv
+      storage:
+        path: "eea/"
+        format: csv"
+        file_name: "UNFCCC_v28.csv"
+
+      # High-level metadata about the dataset
+      metadata:
+        dataset_id: "eea.ghg_inventory.national"
+        description: "National GHG emissions by sector for Germany (UNFCCC inventory)"
+        country: "DE"
+        unit: "Gg CO2 equivalent"
+        source_resolution: "year"
+        granularity: yearly
+        tz: "UTC"
+        schedule: yearly # Inventory is updated once per year
+        format: csv
+
+      # Where we write processed copies in our lakehouse layout.
+      destinations:
+        broze:
+          # Raw-ish copy (maybe filtered to DE only, same columns)
+          path: "eea/ghg_inventory_raw/"
+          format: parquet
+        silver:
+          # Cleaned+normalised table (types fijos, códigos sectoriales limpios, etc.)
+          path: "eea/ghg_inventory_by_sector/"
+          format: parquet
+        gold:
+          # High-level aggregates (e.g., total GHG by year, by main sector)
+          path: "eea/ghg_inventory_aggregated/"
+          format: parquet
