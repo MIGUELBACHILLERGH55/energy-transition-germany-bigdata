@@ -3,6 +3,7 @@ from pyspark.sql import functions as sf
 from src.transform.core.pipelines.batch_transformer import BatchTransformerPipeline
 
 
+# TODO: refactor this using the new helpers
 class OpsdTransformerPipeline(BatchTransformerPipeline):
     def apply_steps(self, ds_name: str, df: DataFrame, verbose=True) -> DataFrame:
         if verbose:
