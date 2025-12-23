@@ -20,7 +20,7 @@ eea:
       #   data/landing/eea/UNFCCC_v28.csv
       storage:
         path: "eea/"
-        format: csv"
+        format: csv
         file_name: "UNFCCC_v28.csv"
 
       # High-level metadata about the dataset
@@ -37,7 +37,7 @@ eea:
 
       # Where we write processed copies in our lakehouse layout.
       destinations:
-        broze:
+        bronze:
           # Raw-ish copy (maybe filtered to DE only, same columns)
           path: "eea/ghg_inventory_raw/"
           format: parquet

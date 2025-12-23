@@ -1,13 +1,9 @@
 from pathlib import Path
-from pyspark.sql.types import StructType
 from pyspark.sql import SparkSession, DataFrame
 from src.config.models.project_models import ProjectConfig
 from src.config.models.source_models import SourceSpec
-from src.extract.core.planning import plan_item
 from src.io.path_resolver import resolve_input_path, resolve_output_path
 from src.extract.core.planning.plan_item import PlanItem
-from src.config.loader import config
-import pandas as pd
 
 
 class FileExtractor:
@@ -72,9 +68,7 @@ class FileExtractor:
             # JSON
             # ----------------------------
             case "json":
-                return self.spark_session.read.option("multiLine", True).json(
-                    paths
-                )  # útil para JSONs “bonitos”
+                return self.spark_session.read.option("multiLine", True).json(paths)
 
             # ----------------------------
             # EXCEL (requiere spark-excel)

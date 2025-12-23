@@ -4,77 +4,122 @@
 
 Este proyecto forma parte de la **Unidad 3 — Adquisición de Datos** de la asignatura **Big Data**.
 
-El objetivo principal es **diseñar e implementar un proceso ETL con Apache Spark**, capaz de **extraer, transformar y almacenar datos energéticos reales de Alemania** para analizar distintos aspectos de la transición energética del país.
+El objetivo es **diseñar e implementar un proceso ETL con Apache Spark** que permita **extraer, transformar y almacenar datos energéticos reales de Alemania**, con el fin de analizar distintos aspectos de la transición energética del país.
 
-El proyecto sigue una **arquitectura lakehouse**, separando claramente las fases de:
+El proyecto sigue una **arquitectura lakehouse**, diferenciando claramente las fases de:
 
-- **Ingesta de datos (Landing)**
-- **Materialización raw (Bronze)**
-- **Transformación limpia y estructurada (Silver)**
+* Ingesta de datos (**Landing**)
+* Materialización raw (**Bronze**)
+* Transformación limpia y estructurada (**Silver**)
 
 Las fuentes de datos utilizadas son **oficiales y públicas**, garantizando la fiabilidad del análisis.
 
 ---
 
+## Repositorio del proyecto
+
+Repositorio GitHub:
+
+[https://github.com/MIGUELBACHILLERGH55/energy-transition-germany-bigdata.git](https://github.com/MIGUELBACHILLERGH55/energy-transition-germany-bigdata.git)
+
+```bash
+git clone https://github.com/MIGUELBACHILLERGH55/energy-transition-germany-bigdata.git
+cd energy-transition-germany-bigdata
+```
+
+---
+
 ## Fuentes de datos
 
-Las fuentes utilizadas en el proyecto son:
-
-- **SMARD.de**
+* **SMARD.de**
   Datos horarios de generación, demanda y precios del sistema eléctrico alemán.
 
-- **AGEB**
+* **AGEB**
   Balances energéticos históricos de Alemania (1990–2024).
 
-- **OPSD (Open Power System Data)**
+* **OPSD (Open Power System Data)**
   Series temporales energéticas (2015–2020).
 
-- **EEA (European Environment Agency)**
+* **EEA (European Environment Agency)**
   Emisiones nacionales de gases de efecto invernadero (1985–2023).
 
 ---
 
 ## Arquitectura del proyecto
 
-La arquitectura está organizada por capas siguiendo buenas prácticas en Big Data:
-
 ```text
 data/
-├── landing/          # Datos originales tal y como se descargan
+├── landing/          # Datos originales descargados
 │   ├── smard/
 │   ├── ageb/
 │   ├── opsd/
 │   └── eea/
-├── bronze/           # Datos raw materializados en Parquet (Spark)
+├── bronze/           # Datos raw materializados en Parquet
 │   └── opsd/
-├── silver/           # Datos limpios, tipados y enriquecidos
+├── silver/           # Datos transformados y limpios
 │   └── opsd/
 ```
 
 ### Capas del lakehouse
 
-- **Landing**
-  Datos originales en formatos CSV, Excel o JSON.
+* **Landing**
+  Datos originales tal y como se descargan de las fuentes oficiales.
+  **Los archivos ya están incluidos en el repositorio. No es necesario añadir ni modificar datos.**
 
-- **Bronze**
-  Datos leídos con Spark y almacenados en formato Parquet, sin aplicar lógica de negocio.
+* **Bronze**
+  Lectura de los datos con Spark y persistencia en formato Parquet, sin aplicar lógica de negocio.
 
-- **Silver**
-  Datos transformados:
-  - Tipos de datos correctos
-  - Timestamps normalizados
-  - Columnas limpias y estructuradas
+* **Silver**
+  Transformación de los datos:
+
+  * Tipado correcto de columnas
+  * Normalización de timestamps
+  * Limpieza y estandarización de nombres
+  * Estructura lista para análisis
 
 ---
 
 ## Requisitos del sistema
 
-- Sistema operativo: Windows, macOS o Linux
-- Acceso a internet
-- **Java 11 o superior** (recomendado Java 17)
-- **Conda / Miniforge**
+* Windows, macOS o Linux
+* Acceso a internet
+* **Java 11 o superior** (recomendado Java 17)
 
-### Verificación rápida de Java
+---
+
+## Requisito obligatorio: Java (Apache Spark)
+
+Este proyecto utiliza **Apache Spark**, el cual se ejecuta sobre la **Java Virtual Machine (JVM)**.
+Por este motivo, **Java es un requisito obligatorio**, independientemente de que el entorno Python se gestione con Micromamba o Conda.
+
+> Micromamba gestiona las dependencias de Python, pero **no instala ni configura Java del sistema**.
+
+### Comprobar si Java está instalado
+
+```bash
+java -version
+```
+
+Si la versión es **11 o superior**, no es necesario instalar nada más.
+
+---
+
+### Instalación de Java (macOS — opción recomendada)
+
+Si Java no está instalado o la versión es inferior a 11:
+
+```bash
+brew install openjdk@17
+```
+
+Añadir Java al `PATH` (solo una vez):
+
+```bash
+echo 'export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Verificación:
 
 ```bash
 java -version
@@ -82,75 +127,70 @@ java -version
 
 ---
 
-## Instalación del entorno
+## Instalación del entorno Python (Micromamba — recomendado)
 
-### 1. Instalar Miniforge
+Para simplificar la instalación y reducir dependencias, se recomienda **Micromamba**, una alternativa ligera a Conda.
 
-Descargar e instalar Miniforge desde:
+### 1. Instalar Micromamba (macOS)
 
-[https://github.com/conda-forge/miniforge](https://github.com/conda-forge/miniforge)
+```bash
+brew install micromamba
+```
 
-Durante la instalación, aceptar las opciones por defecto.
+Inicializar Micromamba (solo la primera vez):
+
+```bash
+micromamba shell init -s zsh -p ~/micromamba
+```
+
+Cerrar y volver a abrir la terminal.
 
 ---
 
-### 2. Clonar el repositorio y abrir una terminal
+### 2. Crear el entorno del proyecto
+
+Desde la raíz del repositorio:
 
 ```bash
-cd energy-transition-germany-bigdata
+micromamba create -f environment.yml
+```
+
+Se creará el entorno:
+
+```text
+energy-trans-env
 ```
 
 ---
 
-### 3. Crear el entorno Conda
+### 3. Activar el entorno
 
-Desde la raíz del proyecto:
+```bash
+micromamba activate energy-trans-env
+```
+
+---
+
+## Instalación alternativa (Conda / Miniforge)
 
 ```bash
 conda env create -f environment.yml
-```
-
-Esto creará el entorno `energy-trans-env` con todas las dependencias necesarias.
-
----
-
-### 4. Activar el entorno
-
-```bash
 conda activate energy-trans-env
 ```
 
 ---
 
-## Ejecución del pipeline OPSD (Spark ETL)
+## Ejecución del pipeline ETL (OPSD)
 
-### Preparar los datos de entrada
-
-El pipeline asume que los ficheros de OPSD se encuentran en:
+Los datos de entrada **ya están incluidos** en:
 
 ```text
 data/landing/opsd/
 ```
 
-Ejemplo:
-
-```text
-data/landing/opsd/time_series_60min_singleindex.csv
-```
-
-El pipeline admite **uno o varios ficheros** dentro de esta carpeta.
-
----
+No es necesario descargar ni preparar archivos adicionales.
 
 ### Ejecutar el pipeline
-
-El pipeline de transformación de OPSD se encuentra en:
-
-```text
-src/transform/sources/opsd/pipeline.py
-```
-
-Para ejecutarlo:
 
 ```bash
 python -m src.transform.sources.opsd.pipeline
@@ -160,15 +200,15 @@ python -m src.transform.sources.opsd.pipeline
 
 ## Resultados generados
 
-Tras la ejecución se generan datasets en formato **Parquet**, siguiendo el comportamiento estándar de Spark (directorios con ficheros `part-*`).
+El pipeline genera datasets en formato **Parquet**, siguiendo el comportamiento estándar de Spark.
 
-### Bronze
+### Capa Bronze
 
 ```text
 data/bronze/opsd/timeseries_raw/
 ```
 
-### Silver
+### Capa Silver
 
 ```text
 data/silver/opsd/timeseries_hourly/
@@ -176,29 +216,37 @@ data/silver/opsd/timeseries_hourly/
 
 Durante la ejecución se muestran por consola:
 
-- Ejemplos de datos (`df.show()`)
-- Esquema del DataFrame (`df.printSchema()`)
-- Validaciones básicas del proceso ETL
+* Ejemplos de registros (`df.show()`)
+* Esquema del DataFrame (`df.printSchema()`)
+* Validaciones básicas del proceso ETL
+
+Esto permite observar claramente la evolución de los datos desde **Landing → Bronze → Silver**.
 
 ---
 
-## Visualización y exploración
+## Exploración de datos
 
-La exploración de los datos se realiza utilizando **Spark** y, en algunos casos, conversión a **pandas** para visualización básica.
+La exploración se realiza mediante:
 
-Se incluyen:
+* Spark DataFrames
+* Conversión puntual a pandas cuando es necesario
 
-- Estadísticas descriptivas
-- Ejemplos de análisis temporal
-
-Todo ello para cumplir con los requisitos de exploración establecidos en el enunciado.
+Incluye estadísticas descriptivas y ejemplos de análisis temporal, cumpliendo los requisitos de la asignatura.
 
 ---
 
 ## Autores
 
-- **Tomás Morales**
-- **Miguel Bachiller Segovia**
+* **Tomás Morales**
+* **Miguel Bachiller Segovia**
 
 **Asignatura:** Big Data — Unidad 3 — Adquisición de Datos
 **Curso:** 2025 / 2026
+
+---
+
+Si quieres, el siguiente paso natural sería:
+
+* Una **nota al evaluador** explicando por qué esto es adquisición de datos
+* Un **diagrama simple de la arquitectura ETL**
+* O una revisión final con mentalidad de tribunal (qué mirarían para bajar nota)
