@@ -44,4 +44,4 @@ class BatchTransformerPipeline:
         for ds_name, bronze_path in bronze_paths.items():
             df = self.read_bronze(bronze_path)
             df2 = self.apply_steps(ds_name, df)
-            self.write_silver(ds_name, df2)
+            # self.write_silver(ds_name, df2)
