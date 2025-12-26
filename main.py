@@ -2,12 +2,12 @@
 
 from src.config.loader import config
 from pyspark.sql import SparkSession
-from src.transform.sources.eea.pipeline import EeaTransformerPipeline
+from src.transform.sources.opsd.pipeline import OpsdTransformerPipeline
+
 
 proj_config = config.project_config
-eea_source = config.sources["eea"]
+opsd_source = config.sources["opsd"]
 spark_session = SparkSession.builder.getOrCreate()
 
-
-eea_pipeline = EeaTransformerPipeline(spark_session, proj_config, eea_source)
-eea_pipeline.run()
+opsd_pipeline = OpsdTransformerPipeline(spark_session, proj_config, opsd_source)
+opsd_pipeline.run()

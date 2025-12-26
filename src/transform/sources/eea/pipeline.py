@@ -1,4 +1,4 @@
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql import functions as sf
 from src.transform.core.pipelines.batch_transformer import BatchTransformerPipeline
 from src.transform.core.steps.base_step import (
@@ -11,7 +11,7 @@ from src.transform.core.steps.base_step import (
 
 
 class EeaTransformerPipeline(BatchTransformerPipeline):
-    def apply_steps(self, ds_name: str, df: DataFrame, verbose=True) -> DataFrame:
+    def apply_steps(self, ds_name: str, df: DataFrame, verbose=False) -> DataFrame:
         # Define cols to remove as list[str]
         cols_to_remove = [
             "Country_code",
@@ -112,3 +112,4 @@ class EeaTransformerPipeline(BatchTransformerPipeline):
         for ds_name, bronze_path in bronze_paths.items():
             df = self.read_bronze(bronze_path)
             df2 = self.apply_steps(ds_name, df)
+            self.write_silver(ds_name, df2)
