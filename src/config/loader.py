@@ -165,6 +165,7 @@ class ConfigLoader:
                         dataset_cfg.get("destinations", None),
                         DestinationSpec,
                     ),
+                    excel=dataset_cfg.get("excel", None),
                 )
 
                 datasets[dataset_name] = dataset

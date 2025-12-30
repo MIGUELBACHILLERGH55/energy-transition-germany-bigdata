@@ -5,12 +5,13 @@ from src.transform.core.pipelines.batch_transformer import BatchTransformerPipel
 from src.transform.core.steps.base_step import (
     rename_cols,
 )
-from src.transform.sources.opsd.steps import show_nulls_month_hour_count
+
+# from src.transform.sources.opsd.steps import show_nulls_month_hour_count
+from src.transform.sources.opsd.steps.inspect import show_nulls_by_hour
 
 
-# TODO: refactor this using the new helpers
 class OpsdTransformerPipeline(BatchTransformerPipeline):
-    def apply_steps(self, ds_name: str, df: DataFrame, verbose=True) -> DataFrame:
+    def apply_steps(self, ds_name: str, df: DataFrame, verbose=False) -> DataFrame:
         # Cols naming map
         cols_map = {
             "utc_timestamp": "utc_timestamp",
@@ -52,17 +53,17 @@ class OpsdTransformerPipeline(BatchTransformerPipeline):
 
         if verbose:
             print("4. Are there any nulls? Where?")
-            show_nulls_month_hour_count(df, "solar_gen")
-
-        # if verbose:
-        #     print("5. Handle solar generation null values")
-        #
-        # if verbose:
-        #     print("Transformed DataFrame")
-        #     df.select(
-        #         "event_date_utc",
-        #         sf.date_format("event_ts_utc", "HH:mm:ss").alias("events_ts"),
-        #         *[c for c in df.columns if c not in {"event_date_utc", "event_ts_utc"}],
-        #     ).show(n=50, truncate=False)
+            print("4.1 Load act nulls and ratio: ")
+            show_nulls_by_hour(df, "load_act")
+            print("4.2 Load for nulls and ratio: ")
+            show_nulls_by_hour(df, "load_for")
+            print("4.3 Solar cap nulls and ratio: ")
+            show_nulls_by_hour(df, "solar_cap")
+            print("4.4 Solar gen nulls and ratio: ")
+            show_nulls_by_hour(df, "solar_gen")
+            print("4.5 Wind cap nulls and ratio: ")
+            show_nulls_by_hour(df, "solar_gen")
+            print("4.6 Wind gen nulls and ratio: ")
+            show_nulls_by_hour(df, "wind_gen")
 
         return df
