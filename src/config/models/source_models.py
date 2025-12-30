@@ -31,6 +31,7 @@ class DatasetSpec:
     storage: Dict | None
     metadata: MetadataSpec | None
     destinations: Dict[str, DestinationSpec] | None
+    excel: Dict | None = None
 
 
 @dataclass

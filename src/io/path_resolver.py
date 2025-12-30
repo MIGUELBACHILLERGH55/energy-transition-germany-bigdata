@@ -30,12 +30,32 @@ def resolve_layer_root(project_config: ProjectConfig, layer: str):
 def resolve_input_path(
     project_config: ProjectConfig, dataset: DatasetSpec
 ) -> Path | str:
-    # landing/input
     root = resolve_layer_root(project_config, "landing")
-    if project_config.active_env == "local":
-        return root / dataset.storage["path"]
-    elif project_config.active_env == "prod":
-        return f"{root}{dataset.storage['path']}"
+
+    base = (
+        (root / dataset.storage["path"])
+        if project_config.active_env == "local"
+        else f"{root}{dataset.storage['path']}"
+    )
+
+    # Si el dataset define un file_name, devuelve el archivo exacto
+    file_name = dataset.storage.get("file_name")
+    if file_name:
+        if project_config.active_env == "local":
+            return Path(base) / file_name
+        else:
+            print(f"{base}{file_name}")
+            return f"{base}{file_name}"
+
+    # Si no, devuelve la ruta base (directorio o patrón)
+    pattern = dataset.storage.get("pattern")
+    if pattern:
+        if project_config.active_env == "local":
+            return Path(base) / pattern
+        else:
+            return f"{base}{pattern}"
+
+    return base
 
 
 def resolve_output_path(

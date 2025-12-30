@@ -4,6 +4,7 @@ from src.config.models.project_models import ProjectConfig
 from src.config.models.source_models import SourceSpec
 from src.io.path_resolver import resolve_input_path, resolve_output_path
 from src.extract.core.planning.plan_item import PlanItem
+from src.io.excel import build_excel_read_plan, read_excel_to_spark
 
 
 class FileExtractor:
@@ -27,6 +28,8 @@ class FileExtractor:
         l = []
         for dataset_name, dataset_cfg in self.source.datasets.items():
             if dataset_cfg.enabled:
+                # Rewrite this so plan item includes read options, each DatasetSpec may also contain the excel config
+                # that would helpt to read all the xlsx
                 pi = PlanItem(
                     source_name=self.source.name,
                     dataset_name=dataset_name,
@@ -34,24 +37,42 @@ class FileExtractor:
                     input_path=resolve_input_path(self.project_config, dataset_cfg),
                     input_format=dataset_cfg.storage["format"],
                     output_path=resolve_output_path(
-                        self.project_config, dataset_cfg, "bronze"
+                        self.project_config,
+                        dataset_cfg,
+                        "bronze",
                     ),
+                    # Resolve and build here the list of ExcelReadTask
+                    excel_tasks=build_excel_read_plan(dataset_cfg.excel) or None,
                 )
                 l.append(pi)
         return l
 
     def read_files(self, pi: PlanItem) -> list[Path]:
-        path = pi.input_path
+        path = Path(pi.input_path)
 
+        if "*" in str(path):
+            files = sorted(path.parent.glob(path.name))
+            if not files:
+                raise FileNotFoundError(f"Pattern matched 0 files: {path}")
+            return files
+
+        # 2) If it's a directory, return all files inside
         if path.is_dir():
-            return list(path.glob("*"))
-        elif "*" in str(path):
-            return list(path.parent.glob(path.name))
-        else:
+            files = sorted([p for p in path.iterdir() if p.is_file()])
+            if not files:
+                raise FileNotFoundError(f"Directory has 0 files: {path}")
+            return files
+
+        # 3) If it's a single file, return it
+        if path.is_file():
             return [path]
+
+        # 4) Nothing matched → clear error
+        raise FileNotFoundError(f"Input path not found: {path}")
 
     def transform(self, pi: PlanItem, files: list[Path]) -> DataFrame:
         paths = [str(f) for f in files]
+        print(paths)
 
         match pi.input_format:
             # ----------------------------
@@ -74,12 +95,13 @@ class FileExtractor:
             # EXCEL (requiere spark-excel)
             # ----------------------------
             case "excel" | "xlsx" | "xls":
-                return (
-                    self.spark_session.read.format("com.crealytics.spark.excel")
-                    .option("header", True)
-                    .option("inferSchema", True)
-                    .option("dataAddress", "'Sheet1'!")  # sheet por defecto
-                    .load(paths)
+                # Here we will use a dedicated function that would use excel_plan to resolve which sheets to select
+                return read_excel_to_spark(
+                    spark_session=self.spark_session,
+                    paths=paths,
+                    tasks=pi.excel_tasks,
+                    mode="dict",
+                    union_by_name=True,
                 )
 
             # ----------------------------
@@ -112,4 +134,4 @@ class FileExtractor:
         for pi in items:
             files = self.read_files(pi)
             df = self.transform(pi, files)
-            self.persist_bronze(pi, df)
+            # self.persist_bronze(pi, df)

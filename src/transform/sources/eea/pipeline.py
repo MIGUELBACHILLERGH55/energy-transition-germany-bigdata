@@ -105,11 +105,3 @@ class EeaTransformerPipeline(BatchTransformerPipeline):
             df.show(n=20, truncate=False)
 
         return df
-
-    def run(self) -> None:
-        bronze_paths = self.read_bronze_paths()
-
-        for ds_name, bronze_path in bronze_paths.items():
-            df = self.read_bronze(bronze_path)
-            df2 = self.apply_steps(ds_name, df)
-            self.write_silver(ds_name, df2)

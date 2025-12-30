@@ -2,7 +2,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as sf
 
 
-def inspect_nulls_month_hour(df: DataFrame, col_name: str | None = None):
+def inspect_nulls_by_month_hour(df: DataFrame, col_name: str | None = None):
     if not col_name:
         cols = [
             col
@@ -30,6 +30,21 @@ def inspect_nulls_month_hour(df: DataFrame, col_name: str | None = None):
     return new_df
 
 
-def show_nulls_month_hour_count(df: DataFrame, col_name: str | None = None):
-    df = inspect_nulls_month_hour(df, col_name)
+def show_nulls_by_month_hour(df: DataFrame, col_name: str | None = None):
+    df = inspect_nulls_by_month_hour(df, col_name)
     df.show()
+
+
+def inspect_nulls_by_hour(df: DataFrame, col_name: str):
+    new_df = df.groupBy(sf.hour("cet_cest_timestamp").alias("hour")).agg(
+        sf.count("*").alias("total_rows"),
+        sf.sum(sf.col(col_name).isNull().cast("int")).alias("null_" + col_name),
+    )
+
+    new_df = new_df.withColumn("ratio", sf.try_divide("null_" + col_name, "total_rows"))
+    return new_df
+
+
+def show_nulls_by_hour(df: DataFrame, col_name: str):
+    df = inspect_nulls_by_hour(df, col_name)
+    df.orderBy("hour").show(25)

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Dict
+from src.models.excel import ExcelReadTask
 
 
 @dataclass
@@ -37,5 +39,6 @@ class PlanItem:
         None  # Start of the time window (API / time-series datasets)
     )
     end_ts: datetime | None = None  # End of the time window
+    excel_tasks: list[ExcelReadTask] | None = None
 
     request_params: dict | None = None  # API-specific request parameters
