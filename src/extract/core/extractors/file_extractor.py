@@ -72,7 +72,6 @@ class FileExtractor:
 
     def transform(self, pi: PlanItem, files: list[Path]) -> DataFrame:
         paths = [str(f) for f in files]
-        print(paths)
 
         match pi.input_format:
             # ----------------------------
@@ -100,7 +99,7 @@ class FileExtractor:
                     spark_session=self.spark_session,
                     paths=paths,
                     tasks=pi.excel_tasks,
-                    mode="dict",
+                    mode="single",
                     union_by_name=True,
                 )
 

@@ -61,27 +61,36 @@ def read_excel_to_spark(
     spark_session: SparkSession,
     paths,
     tasks: list[ExcelReadTask],
-    mode: str = "dict",
+    mode: str,
     union_by_name: bool = True,
 ):
-    print("Trouble shooting message")
-    for path in paths:
-        for task in tasks:
-            engine = excel_engine(path)
-            resolved_sheet_name = resolve_sheet_name(engine, path, task.sheet)
-
-            df = pd.read_excel(
-                path,
-                sheet_name=resolved_sheet_name,
-                header=task.header_row,
-            )
-            df.head()
-
-            # Primero leer todo luego cortar
-
     match mode:
         case "single":
-            pass
+            for path in paths:
+                if len(tasks) != 1:
+                    # raise ValueError(
+                    #     f"Cannot select single mode if number of tasks ({len(tasks)}) != 1."
+                    # )
+                    pass
+                for task in tasks:
+                    engine = excel_engine(path)
+                    resolved_sheet_name = resolve_sheet_name(engine, path, task.sheet)
+                    header_pd_index = task.header_row - 1
+                    row_start_pd_index = task.row_start - 1
+
+                    df = pd.read_excel(
+                        path,
+                        sheet_name=resolved_sheet_name,
+                        header=header_pd_index,
+                    )
+
+                    df = df.iloc[row_start_pd_index : task.row_end, 1::]
+                    print(df)
+
+                    df_sp = spark_session.createDataFrame(df)
+
+                    return df_sp
+
         case "dict":
             pass
         case "union":
