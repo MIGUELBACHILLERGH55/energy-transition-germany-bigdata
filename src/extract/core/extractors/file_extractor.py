@@ -70,26 +70,35 @@ class FileExtractor:
         # 4) Nothing matched → clear error
         raise FileNotFoundError(f"Input path not found: {path}")
 
-    def transform(self, pi: PlanItem, files: list[Path]) -> DataFrame:
+    def transform(self, pi: PlanItem, files: list[Path]) -> list[dict[str, DataFrame]]:
         paths = [str(f) for f in files]
-        print(paths)
 
         match pi.input_format:
             # ----------------------------
             # CSV
             # ----------------------------
             case "csv":
-                return (
-                    self.spark_session.read.option("header", True)
-                    .option("inferSchema", True)
-                    .csv(paths)
-                )
+                return [
+                    {
+                        "main": (
+                            self.spark_session.read.option("header", True)
+                            .option("inferSchema", True)
+                            .csv(paths)
+                        )
+                    }
+                ]
 
             # ----------------------------
             # JSON
             # ----------------------------
             case "json":
-                return self.spark_session.read.option("multiLine", True).json(paths)
+                return [
+                    {
+                        "main": self.spark_session.read.option("multiLine", True).json(
+                            paths
+                        )
+                    }
+                ]
 
             # ----------------------------
             # EXCEL (requiere spark-excel)
@@ -101,7 +110,6 @@ class FileExtractor:
                     paths=paths,
                     tasks=pi.excel_tasks,
                     mode="dict",
-                    union_by_name=True,
                 )
 
             # ----------------------------
@@ -113,16 +121,19 @@ class FileExtractor:
                     f"for dataset {pi.dataset_id}"
                 )
 
-    def persist_bronze(self, pi: PlanItem, df: DataFrame) -> None:
+    def persist_bronze(self, pi: PlanItem, df: DataFrame, folder=None) -> None:
         """
         Writes the ingested dataset to the bronze layer.
         Expects pi.output_path to be a directory (not a file).
         """
-        output = str(pi.output_path)
+        if not folder:
+            output = str(pi.output_path)
+        else:
+            output = str(pi.output_path / folder)
 
         writer = df.write.mode(self.mode)
 
-        partition_cols = getattr(pi, "partition_cols", None)
+        partition_cols = getattr(pi, "partitioning", None)
         if partition_cols:
             writer = writer.partitionBy(*partition_cols)
 
@@ -133,5 +144,11 @@ class FileExtractor:
         items = self.plan()
         for pi in items:
             files = self.read_files(pi)
-            df = self.transform(pi, files)
-            # self.persist_bronze(pi, df)
+            list_dicts = self.transform(pi, files)
+            for dict_ in list_dicts:
+                for key, df in dict_.items():
+                    if key == "main":
+                        self.persist_bronze(pi, df)
+                    else:
+                        key_sanitized = key.replace("::", "__")
+                        self.persist_bronze(pi, df, key_sanitized)
