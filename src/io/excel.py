@@ -4,6 +4,7 @@ from pyspark.sql import functions as sf
 from pyspark.sql import DataFrame, SparkSession
 from src.extract.core.planning.plan_item import PlanItem
 from src.models.excel import ExcelReadTask
+import re
 
 
 def excel_engine(path: str) -> str:
@@ -15,7 +16,7 @@ def excel_engine(path: str) -> str:
     raise ValueError(f"Unsupported excel extension: {ext} ({path})")
 
 
-def resolve_sheet_name(engine: str, path: Path, requested: str) -> str:
+def resolve_sheet_name(engine: str, path: str, requested: str) -> str:
     wb = pd.ExcelFile(path, engine=engine)
     sheets = wb.sheet_names
 
@@ -57,32 +58,72 @@ def build_excel_read_plan(cfg: dict):
     return tasks
 
 
+def read_excel_to_pd(path: str, task: ExcelReadTask):
+    engine = excel_engine(path)
+    resolved_sheet_name = resolve_sheet_name(engine, path, task.sheet)
+    header_pd_index = task.header_row - 1
+    row_start_pd_index = task.row_start - 1
+
+    df = pd.read_excel(
+        path,
+        sheet_name=resolved_sheet_name,
+        header=header_pd_index,
+    )
+
+    df = df.iloc[row_start_pd_index : task.row_end, 1::]
+
+    return resolve_sheet_name, df
+
+
 def read_excel_to_spark(
     spark_session: SparkSession,
     paths,
     tasks: list[ExcelReadTask],
-    mode: str = "dict",
-    union_by_name: bool = True,
-):
-    print("Trouble shooting message")
-    for path in paths:
-        for task in tasks:
-            engine = excel_engine(path)
-            resolved_sheet_name = resolve_sheet_name(engine, path, task.sheet)
-
-            df = pd.read_excel(
-                path,
-                sheet_name=resolved_sheet_name,
-                header=task.header_row,
-            )
-            df.head()
-
-            # Primero leer todo luego cortar
-
+    mode: str,
+) -> list[dict[str, DataFrame]]:
     match mode:
         case "single":
-            pass
+            files_list = []
+            for path in paths:
+                if len(tasks) != 1:
+                    raise ValueError(
+                        f"Single mode expects exactly 1 ExcelReadTask, got {len(tasks)}"
+                    )
+                for task in tasks:
+                    _, df = read_excel_to_pd(path, task)
+
+                    df = df.astype(str)
+
+                    df_sp = spark_session.createDataFrame(df)
+
+                    files_list.append(df_sp)
+
+            return files_list
+
         case "dict":
-            pass
-        case "union":
-            pass
+            files_list = []
+            for path in paths:
+                d = {}
+                for task in tasks:
+                    resolved_sheet_name, df = read_excel_to_pd(path, task)
+                    key = f"{(task.sheet).upper()}::{(task.section).upper()}"
+
+                    # If path includes a number we might add it as _year
+                    pattern = r"\d{4}"
+
+                    match = re.search(pattern, str(path))
+
+                    if match:
+                        df._year = match
+
+                    # add the sheet name
+                    df._sheet_name = resolved_sheet_name
+
+                    # add the _source_fi
+                    df._source_fi = Path(path).name
+
+                    df = df.astype(str)
+                    d[key] = spark_session.createDataFrame(df)
+
+                files_list.append(d)
+            return files_list

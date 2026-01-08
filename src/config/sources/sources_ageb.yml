@@ -55,6 +55,7 @@ ageb:
           # One row per (year, carrier, sector) after flattening all Excel files.
           path: "ageb/energy_balance_raw/"
           format: parquet
+          partitioning: ["_year"]
         silver:
           # Cleaned, normalised table ready for joins with OPSD/EEA.
           path: "ageb/energy_balance_by_sector/"
