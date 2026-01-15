@@ -22,3 +22,6 @@ data/landing/smard/**/*.json
 # Pyright (local type-checker config)
 pyrightconfig.json
 
+# Dev playground
+main.py
+
