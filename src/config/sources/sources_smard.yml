@@ -69,6 +69,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_lignite_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.lignite.hourly"
         source_resolution: "hour"
@@ -94,6 +95,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_nuclear_energy_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.nuclear_energy.hourly"
         source_resolution: "hour"
@@ -119,6 +121,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_wind_offshore_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.wind_offshore.hourly"
         source_resolution: "hour"
@@ -144,6 +147,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_hydroelectricity_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.hydroelectricity.hourly"
         source_resolution: "hour"
@@ -169,6 +173,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_other_conventional_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.other_conventional.hourly"
         source_resolution: "hour"
@@ -194,6 +199,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_other_renewables_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.other_renewables.hourly"
         source_resolution: "hour"
@@ -219,6 +225,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_biomass_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.biomass.hourly"
         source_resolution: "hour"
@@ -244,6 +251,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_wind_onshore_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.wind_onshore.hourly"
         source_resolution: "hour"
@@ -270,6 +278,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_photovoltaics_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.photovoltaics.hourly"
         source_resolution: "hour"
@@ -295,6 +304,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_hard_coal_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.hard_coal.hourly"
         source_resolution: "hour"
@@ -320,6 +330,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_pumped_storage_{yyyy}-{mm}-{dd}.json"
+        format: "json"
       metadata:
         dataset_id: "smard.generation.pumped_storage.hourly"
         source_resolution: "hour"
@@ -345,6 +356,7 @@ smard:
         resolution: "hour"
       storage:
         file_naming: "smard_natural_gas_{yyyy}-{mm}-{dd}.json"
+        format: json
       metadata:
         dataset_id: "smard.generation.natural_gas.hourly"
         source_resolution: "hour"
