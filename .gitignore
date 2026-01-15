@@ -18,3 +18,13 @@ data/bronze/
 
 # Ignore all json files
 *json
+
+# SMARD downloaded raw JSONs (must be fetched by the user)
+data/landing/smard/**/*.json
+
+# Pyright (local type-checker config)
+pyrightconfig.json
+
+# Dev playground
+main.py
+
