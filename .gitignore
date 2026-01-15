@@ -1,30 +1,42 @@
-# Python bytecode
+# =========================
+# Python
+# =========================
 __pycache__/
 *.py[cod]
 
+# =========================
 # Virtual environments
+# =========================
 .venv/
 venv/
 
-# PyCharm / VSCode / misc
+# =========================
+# Editors / IDEs
+# =========================
 .idea/
 .vscode/
 
-# Local/output data (si lo quieres evitar desde ya)
-data/bronze/
-
-# Ignore all obsidian folders
+# =========================
+# Notes / personal tools
+# =========================
 **/.obsidian/
 
-# Ignore all json files
-*json
+# =========================
+# Project data (generated)
+# =========================
+data/bronze/
+data/silver/
+data/gold/
 
 # SMARD downloaded raw JSONs (must be fetched by the user)
 data/landing/smard/**/*.json
 
-# Pyright (local type-checker config)
+# =========================
+# Tooling / local config
+# =========================
 pyrightconfig.json
 
+# =========================
 # Dev playground
+# =========================
 main.py
-
