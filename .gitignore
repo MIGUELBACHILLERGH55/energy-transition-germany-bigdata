@@ -16,5 +16,5 @@ data/bronze/
 # Ignore all obsidian folders
 **/.obsidian/
 
-# Ignore all json files
-*json
+# SMARD downloaded raw JSONs (must be fetched by the user)
+data/landing/smard/**/*.json
