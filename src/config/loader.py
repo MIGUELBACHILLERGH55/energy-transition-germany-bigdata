@@ -1,5 +1,7 @@
 # src/config/loader.py
 
+from pyspark.sql import SparkSession
+
 import yaml
 from pathlib import Path
 from pprint import pprint
@@ -204,3 +206,6 @@ class ConfigLoader:
 
 # Singleton-style loader that can be imported from other modules.
 config = ConfigLoader()
+
+# Singleton-style session that would be imported and reused
+spark_session = SparkSession.builder.getOrCreate()
