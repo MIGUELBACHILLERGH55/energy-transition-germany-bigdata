@@ -1,16 +1,13 @@
-# Execute EEA pipeline to ensure its correct functioning
-
 from src.config.loader import config
-from pyspark.sql import SparkSession
-from src.transform.sources.ageb.pipeline import AgebTransformerPipeline
-from src.extract.core.extractors.file_extractor import FileExtractor
+from src.extract.sources.smard.extractors.indices_extractor import SmardIndicesExtractor
 
 
 proj_config = config.project_config
-ageb_source = config.sources["ageb"]
-spark_session = SparkSession.builder.getOrCreate()
+smard_source = config.sources["smard"]
 
-fe = FileExtractor(proj_config, ageb_source, spark_session)
-fe.run()
-# ageb_pipeline = AgebTransformerPipeline(spark_session, proj_config, ageb_source)
-# ageb_pipeline.run()
+smard_indices_extractor = SmardIndicesExtractor(
+    proj_config,
+    smard_source,
+)
+
+smard_indices_extractor.run()
