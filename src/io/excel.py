@@ -20,14 +20,12 @@ def resolve_sheet_name(engine: str, path: str, requested: str) -> str:
     wb = pd.ExcelFile(path, engine=engine)
     sheets = wb.sheet_names
 
-    # Exact or case insenstive
     if requested in sheets:
         return requested
     for s in sheets:
         if s.lower() == requested.lower():
             return s
 
-    # TJ special case
     if requested.lower() == "tj":
         for s in sheets:
             if s.casefold().startswith("tj"):
@@ -36,8 +34,14 @@ def resolve_sheet_name(engine: str, path: str, requested: str) -> str:
     raise ValueError(f"Could not resolve {requested} sheet name.")
 
 
-def build_excel_read_plan(cfg: dict):
+def build_excel_read_plan(cfg: dict) -> list[ExcelReadTask] | None:
     tasks = []
+
+    try:
+        cfg["sheets"]
+    except TypeError:
+        return None
+
     for sheet in cfg["sheets"]:
         selected_ids = [selected_id for selected_id in sheet["select"]]
         requested_sections = [
@@ -62,7 +66,6 @@ def read_excel_to_pd(path: str, task: ExcelReadTask):
     engine = excel_engine(path)
     resolved_sheet_name = resolve_sheet_name(engine, path, task.sheet)
     header_pd_index = task.header_row - 1
-    row_start_pd_index = task.row_start - 1
 
     df = pd.read_excel(
         path,
@@ -70,9 +73,9 @@ def read_excel_to_pd(path: str, task: ExcelReadTask):
         header=header_pd_index,
     )
 
-    df = df.iloc[row_start_pd_index : task.row_end, 1::]
+    df = df.iloc[task.row_start : (task.row_end + 1), 1::]
 
-    return resolve_sheet_name, df
+    return resolved_sheet_name, df
 
 
 def read_excel_to_spark(
@@ -91,11 +94,8 @@ def read_excel_to_spark(
                     )
                 for task in tasks:
                     _, df = read_excel_to_pd(path, task)
-
                     df = df.astype(str)
-
                     df_sp = spark_session.createDataFrame(df)
-
                     files_list.append(df_sp)
 
             return files_list
@@ -108,19 +108,14 @@ def read_excel_to_spark(
                     resolved_sheet_name, df = read_excel_to_pd(path, task)
                     key = f"{(task.sheet).upper()}::{(task.section).upper()}"
 
-                    # If path includes a number we might add it as _year
                     pattern = r"\d{4}"
-
                     match = re.search(pattern, str(path))
 
                     if match:
-                        df._year = match
+                        df["_year"] = match.group(0)
 
-                    # add the sheet name
-                    df._sheet_name = resolved_sheet_name
-
-                    # add the _source_fi
-                    df._source_fi = Path(path).name
+                    df["_sheet_name"] = resolved_sheet_name
+                    df["_source_fi"] = Path(path).name
 
                     df = df.astype(str)
                     d[key] = spark_session.createDataFrame(df)
