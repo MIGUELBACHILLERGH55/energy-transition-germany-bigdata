@@ -1,7 +1,4 @@
-from src.config.models.project_models import ProjectInfo
-from src.config.models.source_models import SourceSpec
-from src.io.path_resolver import resolve_output_path, resolve_input_path
-from src.config.loader import config
+from src.io.path_resolver import resolve_output_path
 from pyspark.sql import SparkSession, DataFrame
 from pathlib import Path
 
@@ -15,14 +12,18 @@ class BatchTransformerPipeline:
         self.project_config = project_config
         self.source = source
 
-    def read_bronze_paths(self) -> dict[str, Path]:
-        bronze_paths: dict[str, Path] = {}
+    def read_bronze_paths(self) -> dict[str, list[Path | str]]:
+        bronze_paths: dict[str, list[Path | str]] = {}
+
+        # Rewrite this contract so it returns list of paths
+
         for ds_name, ds in self.source.datasets.items():
             if not ds.enabled:
                 continue
-            bronze_paths[ds_name] = resolve_output_path(
-                self.project_config, ds, layer="bronze"
-            )
+            bronze_paths[ds_name] = [
+                resolve_output_path(self.project_config, ds, layer="bronze")
+            ]
+
         return bronze_paths
 
     def read_bronze(self, bronze_path: Path) -> DataFrame:
@@ -36,12 +37,13 @@ class BatchTransformerPipeline:
     def write_silver(self, ds_name: str, df: DataFrame) -> None:
         ds = self.source.datasets[ds_name]
         silver_path = resolve_output_path(self.project_config, ds, layer="silver")
-        (df.write.mode("overwrite").parquet(str(silver_path)))
+        (df.write.mode("append").parquet(str(silver_path)))
 
     def run(self) -> None:
         bronze_paths = self.read_bronze_paths()
 
-        for ds_name, bronze_path in bronze_paths.items():
-            df = self.read_bronze(bronze_path)
-            df2 = self.apply_steps(ds_name, df)
-            # self.write_silver(ds_name, df2)
+        for ds_name, bronze_paths in bronze_paths.items():
+            for path in bronze_paths:
+                df = self.read_bronze(path)
+                df2 = self.apply_steps(ds_name, df)
+                self.write_silver(ds_name, df2)
