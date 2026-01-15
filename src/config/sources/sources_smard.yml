@@ -14,7 +14,7 @@
 smard:
   enabled: true # Entire SMARD source can be toggled on/off.
   kind: api # Access type for this provider (api|file|db|ftp).
-  base_url: "https://www.smard.de/app/" # Root endpoint for all dataset requests.
+  base_url: "https://www.smard.de/app" # Root endpoint for all dataset requests.
   availability_lag_days: 3
   headers:
     user_agent: "energiewende-ingestor/1.0" # Identifies our client in HTTP requests.
