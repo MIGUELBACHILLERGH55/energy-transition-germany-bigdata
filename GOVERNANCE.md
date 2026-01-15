@@ -119,14 +119,18 @@ El proyecto utiliza **versionado semántico (Semantic Versioning)**:
 
 `vMAJOR.MINOR.PATCH`
 
+Durante las fases iniciales del desarrollo se emplean versiones `0.x` para
+reflejar que el sistema se encuentra en evolución activa. La versión `v1.0.0`
+se reserva para una versión futura con el flujo ETL completo y estable.
+
 Ejemplos:
-- `v1.0.0`: primera versión estable
-- `v1.0.1`: correcciones compatibles
-- `v1.1.0`: nuevas funcionalidades compatibles
+- `v0.1.0`: primera iteración estable de la arquitectura
+- `v0.1.1`: correcciones compatibles
+- `v0.2.0`: ampliación funcional durante la fase de desarrollo
+- `v1.0.0`: primera versión estable con el flujo completo del sistema
 
 Las versiones estables se etiquetan en la rama `main` mediante tags en la
 plataforma de hosting.
-
 ---
 
 ## 6. Roles y responsabilidades

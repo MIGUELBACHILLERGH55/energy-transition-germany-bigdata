@@ -14,58 +14,6 @@ ageb:
 
   datasets:
     # --------------------------------------------------------
-    # Annual Energy Balance Workbooks (Energy Balance 2000–2030)
-    # --------------------------------------------------------
-    energy_balance_annual:
-      enabled: true
-      access: file
-
-      # Raw files as downloaded from AGEB.
-      # With base_path = "data", this becomes:
-      #   data/landing/ageb/energy_balance_2000.xls
-      #   data/landing/ageb/energy_balance_2001.xls
-      #   ...
-      excel:
-        sheets:
-          - name: "tj"
-            sections:
-              - id: "TJ"
-                header_row: 4
-                row_range: { start: 8, end: 75 }
-            select: ["TJ"]
-
-      storage:
-        path: "ageb/"
-        format: excel
-        pattern: "energy_balance_*.xls*"
-
-      metadata:
-        dataset_id: "ageb.energy_balance.annual"
-        description: "Annual energy balance workbooks for Germany (Energy Balance 2000–2030)."
-        country: "DE"
-        unit: "PJ / ktoe (depending on table)"
-        source_resolution: "year"
-        granularity: yearly
-        tz: "UTC"
-        schedule: ad_hoc # Updated when new AGEB releases are downloaded
-        format: excel
-
-      destinations:
-        bronze:
-          # One row per (year, carrier, sector) after flattening all Excel files.
-          path: "ageb/energy_balance_raw/"
-          format: parquet
-          partitioning: ["_year"]
-        silver:
-          # Cleaned, normalised table ready for joins with OPSD/EEA.
-          path: "ageb/energy_balance_by_sector/"
-          format: parquet
-        gold:
-          # High-level aggregates (e.g. total primary energy, RES share, etc.).
-          path: "ageb/energy_balance_aggregated/"
-          format: parquet
-
-    # --------------------------------------------------------
     # Evaluation Tables (Evaluation Tables on the Energy Balance)
     # --------------------------------------------------------
     evaluation_tables:
@@ -81,48 +29,48 @@ ageb:
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 12 }
+                row_range: { start: 1, end: 8 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 15, end: 21 }
+                row_range: { start: 10, end: 17 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 24, end: 30 }
+                row_range: { start: 19, end: 26 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 33, end: 39 }
+                row_range: { start: 28, end: 35 }
             select: ["PJ"]
           - name: "1.2"
             title: "Import by energy source"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
           - name: "1.3"
             title: "Export by energy source"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
 
           - name: "2.1"
@@ -130,16 +78,16 @@ ageb:
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
 
           - name: "2.2"
@@ -147,13 +95,13 @@ ageb:
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 16 }
+                row_range: { start: 1, end: 11 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 18, end: 28 }
+                row_range: { start: 13, end: 23 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 30, end: 40 }
+                row_range: { start: 25, end: 35 }
             select: ["PJ"]
 
           - name: "3.1"
@@ -161,16 +109,16 @@ ageb:
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
 
           - name: "4.1"
@@ -178,16 +126,16 @@ ageb:
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
 
           - name: "5.1"
@@ -195,16 +143,16 @@ ageb:
             sections:
               - id: "GENERATION_TWH"
                 header_row: 4
-                row_range: { start: 6, end: 10 }
+                row_range: { start: 1, end: 6 }
               - id: "TRANSFORMATION_INPUT_PJ"
                 header_row: 4
-                row_range: { start: 13, end: 15 }
+                row_range: { start: 8, end: 11 }
               - id: "EFFICIENCY_PCT"
                 header_row: 4
-                row_range: { start: 18, end: 19 }
+                row_range: { start: 13, end: 14 }
               - id: "CHP_SHARE_PCT"
                 header_row: 4
-                row_range: { start: 21, end: 21 }
+                row_range: { start: 16, end: 16 }
             select: ["GENERATION_TWH", "TRANSFORMATION_INPUT_PJ"]
 
           - name: "6.1"
@@ -212,109 +160,109 @@ ageb:
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
           - name: "6.2"
             title: "Final energy consumption by energy source: Mining and quarrying, manufacturing industry"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
           - name: "6.3"
             title: "Final energy consumption by energy source: private households"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
           - name: "6.4"
             title: "Final energy consumption by energy source: trade, commerce and services (TCS)"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
           - name: "6.6"
             title: "Final energy consumption by energy source: transport"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 14 }
+                row_range: { start: 1, end: 10 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 17, end: 25 }
+                row_range: { start: 12, end: 21 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 28, end: 36 }
+                row_range: { start: 23, end: 32 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 39, end: 47 }
+                row_range: { start: 34, end: 43 }
             select: ["PJ"]
           - name: "6.7"
             title: "Final energy consumption: transport by sectors and selected energy sources"
             sections:
               - id: "PJ"
                 header_row: 4
-                row_range: { start: 6, end: 12 }
+                row_range: { start: 1, end: 8 }
               - id: "TCE"
                 header_row: 4
-                row_range: { start: 15, end: 21 }
+                row_range: { start: 10, end: 17 }
               - id: "PCT"
                 header_row: 4
-                row_range: { start: 24, end: 30 }
+                row_range: { start: 19, end: 26 }
               - id: "DELTA_PCT"
                 header_row: 4
-                row_range: { start: 33, end: 39 }
+                row_range: { start: 28, end: 35 }
             select: ["PJ"]
           - name: "7.1"
             title: "Energy efficiency indicators"
             sections:
               - id: "ACTIVITY_VARS"
                 header_row: 4
-                row_range: { start: 6, end: 11 }
+                row_range: { start: 1, end: 6 }
               - id: "ENERGY_INTENSITY"
                 header_row: 4
-                row_range: { start: 13, end: 22 }
+                row_range: { start: 8, end: 17 }
               - id: "ENERGY_INTENSITY_DELTA_PCT"
                 header_row: 4
-                row_range: { start: 24, end: 33 }
+                row_range: { start: 19, end: 28 }
             select: ["ENERGY_INTENSITY"]
 
       storage:
