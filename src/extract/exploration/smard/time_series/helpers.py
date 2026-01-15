@@ -1,19 +1,19 @@
 # energy-transition-germany-bigdata/src/extract/exploration/smard/times_series/helpers.py
 from pathlib import Path
-from datetime import datetime, timezone
 from itertools import islice
 from pprint import pprint
-from ..constants import (
-    Endpoint,
-    base_smard_endpoint,
+from src.extract.sources.smard.models.endpoint import (
+    SmardIndicesEndpoint,
+    SmardTimeseriesEndpoint,
 )
-from ..helpers import (
+
+from src.extract.sources.smard.endpoints.builders import (
     build_time_series_data_endpoint,
     build_indices_endpoint,
-    fetch_json,
     ts_to_datetime,
 )
-from ...helpers import save_summary_to_json
+from src.io.http import fetch_json
+from src.io.json import write_json
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
@@ -27,8 +27,8 @@ def smard_time_series_exploration(
 ):
     for resolution in resolutions_to_explore:
         for filter_name, filter_value in filters_to_explore.items():
-            indices_endpoint = base_smard_endpoint._replace(
-                filter=filter_value, resolution=resolution
+            indices_endpoint = SmardIndicesEndpoint(
+                "https://www.smard.de/app", filter_value, resolution
             )
             endpoint = build_indices_endpoint(indices_endpoint)
 
@@ -46,7 +46,7 @@ def smard_time_series_exploration(
             )
 
             if save:
-                file_path = save_summary_to_json(
+                write_json(
                     summary,
                     output_dir=output_dir
                     or CURRENT_DIR / "time_series_metadata_summaries",
@@ -121,14 +121,18 @@ def build_time_series_summary(
     snippet = []
 
     for ts in islice(list_timestamps_ms, max_calls):
-        time_series_endpoint_nt = base_smard_endpoint._replace(
+        time_series_endpoint = SmardTimeseriesEndpoint(
+            "https://www.smard.de/app",
             filter=filter_value,
             resolution=resolution,
-            timestamp=str(ts),
+            timestamp_ts=str(ts),
         )
-        time_series_endpoint_str = build_time_series_data_endpoint(
-            time_series_endpoint_nt
+
+        time_series_endpoint = SmardTimeseriesEndpoint(
+            "https://www.smard.de/app", filter_value, resolution, timestamp_ts=str(ts)
         )
+
+        time_series_endpoint_str = build_time_series_data_endpoint(time_series_endpoint)
         data = fetch_json(time_series_endpoint_str)
 
         for record in data["series"][:max_records_per_call]:

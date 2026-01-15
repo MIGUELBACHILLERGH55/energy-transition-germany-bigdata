@@ -1,9 +1,8 @@
 from pathlib import Path
-import json
-from datetime import datetime, timezone
-from ..constants import base_smard_endpoint, Endpoint
-from ..helpers import build_indices_endpoint, fetch_json, ts_to_datetime
+from ..constants import base_smard_endpoint
+from ..helpers import build_indices_endpoint, ts_to_datetime
 from ...helpers import save_summary_to_json
+from src.io.http import fetch_json
 from pprint import pprint
 
 CURRENT_DIR = Path(__file__).resolve().parent
