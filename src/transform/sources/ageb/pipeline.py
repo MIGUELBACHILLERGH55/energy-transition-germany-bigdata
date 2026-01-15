@@ -31,8 +31,6 @@ class AgebTransformerPipeline(BatchTransformerPipeline):
                 resolve_output_path(self.project_config, ds, layer="bronze")
             )
 
-        print(bronze_paths)
-
         return bronze_paths
 
     # This is gonna throw an error it is all right
