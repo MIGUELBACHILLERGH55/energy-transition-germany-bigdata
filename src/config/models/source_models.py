@@ -30,7 +30,7 @@ class DatasetSpec:
     request: Dict | None
     storage: Dict | None
     metadata: MetadataSpec | None
-    destinations: Dict[str, DestinationSpec] | None
+    destinations: Dict[str, DestinationSpec]
     excel: Dict | None = None
 
 
