@@ -46,6 +46,8 @@ smard:
         schedule: daily # Expected update frequency
         format: json
       destinations:
+        landing:
+          path: "smard/prices/" # Where raw JSON is stored (data/landing/ + this)
         bronze:
           path: "smard/prices/" # Where raw JSON is stored (data/bronze/ + this)
         silver:
@@ -75,6 +77,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/lignite/" # Where raw JSON is stored (data/landing/ + this)
         bronze:
           path: "smard/generation/lignite/"
         silver:
@@ -98,6 +102,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/nuclear_energy/" # Where raw JSON is stored (data/landing/ + this)
         bronze:
           path: "smard/generation/nuclear_energy/"
         silver:
@@ -121,6 +127,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/wind_offshore/"
         bronze:
           path: "smard/generation/wind_offshore/"
         silver:
@@ -144,6 +152,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/hydroelectricity/"
         bronze:
           path: "smard/generation/hydroelectricity/"
         silver:
@@ -167,6 +177,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/other_conventional/"
         bronze:
           path: "smard/generation/other_conventional/"
         silver:
@@ -190,6 +202,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/other_renewables/"
         bronze:
           path: "smard/generation/other_renewables/"
         silver:
@@ -213,6 +227,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/biomass/"
         bronze:
           path: "smard/generation/biomass/"
         silver:
@@ -236,6 +252,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/wind_onshore/"
         bronze:
           path: "smard/generation/wind_onshore/"
         silver:
@@ -260,6 +278,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/photovoltaics/"
         bronze:
           path: "smard/generation/photovoltaics/"
         silver:
@@ -283,6 +303,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/hard_coal/"
         bronze:
           path: "smard/generation/hard_coal/"
         silver:
@@ -306,6 +328,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/pumped_storage/"
         bronze:
           path: "smard/generation/pumped_storage/"
         silver:
@@ -329,6 +353,8 @@ smard:
         schedule: daily
         format: json
       destinations:
+        landing:
+          path: "smard/generation/natural_gas/"
         bronze:
           path: "smard/generation/natural_gas/"
         silver:
