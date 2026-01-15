@@ -31,14 +31,18 @@ class PlanItem:
     dataset_name: str  # Dataset key inside the source
     dataset_id: str  # Canonical dataset identifier (for lineage / metadata)
 
-    input_path: Path | str | None  # File or directory to read from (file-based sources)
     input_format: str
     output_path: Path  # Target path where processed data will be written
+
+    input_path: Path | str | None = (
+        None  # File or directory to read from (file-based sources)
+    )
 
     start_ts: datetime | None = (
         None  # Start of the time window (API / time-series datasets)
     )
     end_ts: datetime | None = None  # End of the time window
     excel_tasks: list[ExcelReadTask] | None = None
+    partitioning: list | None = None
 
     request_params: dict | None = None  # API-specific request parameters
