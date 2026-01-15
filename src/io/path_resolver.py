@@ -6,10 +6,10 @@ from src.config.loader import config
 from pathlib import Path
 
 
-def resolve_layer_root(project_config: ProjectConfig, layer: str):
+def resolve_layer_root(project_config: ProjectConfig, layer: str) -> Path | str:
     if layer.casefold() not in ("landing", "bronze", "silver", "gold"):
         raise ValueError(
-            "Layers available are bronze, silver or gold. Please, try again."
+            "Layers available are landing, bronze, silver or gold. Please, try again."
         )
 
     active_env = project_config.active_env
@@ -61,9 +61,9 @@ def resolve_input_path(
 def resolve_output_path(
     project_config: ProjectConfig, dataset: DatasetSpec, layer: str
 ) -> Path | str:
-    # bronze/silver/gold output
-    if layer not in ("bronze", "silver", "gold"):
-        raise ValueError("Output layer must be bronze/silver/gold")
+    # landing/bronze/silver/gold output
+    if layer not in ("landing", "bronze", "silver", "gold"):
+        raise ValueError("Output layer must be landing/bronze/silver/gold")
     root = resolve_layer_root(project_config, layer)
     dest = dataset.destinations.get(layer)
     if dest is None:
