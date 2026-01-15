@@ -1,18 +1,13 @@
 # src/extract/core/extractors/batch_extractor.py
-from abc import abstractclassmethod, abstractmethod
-from typing import BinaryIO
-
-from pyspark.sql import SparkSession
-from src.config.loader import config, ProjectConfig
+from src.config.loader import ProjectConfig
 from src.config.models.source_models import SourceSpec, DatasetSpec
 from src.extract.core.planning.plan_item import PlanItem
 from src.io.path_resolver import resolve_layer_root
 from src.config.paths import PROJECT_ROOT
-
-from datetime import date, timedelta, time, datetime
-from pprint import pprint
 import requests
+from datetime import date, timedelta, time, datetime
 from src.extract.core.strategies.downloader_base import BaseDownloader
+from typing import Type
 
 """
 Batch Extractor
@@ -27,9 +22,7 @@ Responsibilities:
   1. prepare() → setup sessions, headers, paths
   2. plan() → determine units of work (PlanItem list)
   3. fetch() → retrieve raw data via DownloaderStrategy
-  4. parse() → transform raw payload via ParserStrategy
-  5. persist_landing() → write cleaned data via StorageClient
-  6. report() → summarize metrics and results
+  1-3: run() -> run full extraction lifecycle
 - Ensure idempotent and profile-aware persistence.
 - Handle error reporting and orchestration-level metrics.
 
@@ -41,17 +34,14 @@ to injected strategy classes.
 class BatchExtractor:
     def __init__(
         self,
-        spark_session: SparkSession,
         project_config: ProjectConfig,
         source: SourceSpec,
-        downloader,
-        parser,
+        downloader_cls: Type[BaseDownloader],
         run_date: date | None = None,
     ):
         self.project_config = project_config
         self.source = source
-        self.downloader = downloader
-        self.parser = parser
+        self.downloader_cls = downloader_cls
         self.run_date = run_date or date.today()
         self.safety_lag_days = source.availability_lag_days
         self.effective_date = self.run_date - timedelta(days=self.safety_lag_days)
@@ -62,57 +52,47 @@ class BatchExtractor:
         storage_profile = self.project_config.profiles.get(env_profile)
 
         self.active_env = active_env
-        self.storage_profile = storage_profile
 
-        self.bronze_root = resolve_layer_root(self.project_config, "bronze")
+        self.storage_profile = storage_profile
 
         if self.source.kind == "api":
             session = requests.Session()
             base_url = self.source.base_url
             retry = self.source.retry
             timeout_s = self.source.timeout_s
-            self.downloader = self.downloader(session, base_url, timeout_s, retry)
+            self.downloader = self.downloader_cls(
+                session, base_url, timeout_s, retry, self.run_date
+            )
 
         else:
             self.session = None
 
     def plan(self) -> list[PlanItem]:
         source_name = self.source.name
-        l = []
-        for ds_name, ds_cfg in self.source.datasets.items():
+        plan_item_list = []
+        for ds_name, dataset_cfg in self.source.datasets.items():
             pi = PlanItem(
                 source_name=source_name,
-                dataset_name=ds_cfg.name,
-                dataset_id=ds_cfg.metadata.dataset_id,
+                dataset_name=dataset_cfg.name,
+                dataset_id=dataset_cfg.metadata.dataset_id,
                 start_ts=datetime.combine(self.effective_date, time(0, 0)),
                 end_ts=datetime.combine(self.effective_date, time(23, 0)),
-                request_params=ds_cfg.request,
-                output_path=ds_cfg.destinations["bronze"].path,
+                request_params=dataset_cfg.request,
+                output_path=dataset_cfg.destinations["bronze"].path,
+                input_format=dataset_cfg.storage["format"],
             )
-            l.append(pi)
-        return l
+            plan_item_list.append(pi)
+        return plan_item_list
 
-    @abstractmethod
-    def fetch(self):
+    def fetch(self, pi: PlanItem):
         # create a downloader and init it with
         # session,base_url, timeout_s, retry
         # for plan_item in list_plan_items:
         #     downloader.download(plan_item)
-        pass
+        self.downloader.fetch(pi)
 
-    def parse(self):
-        pass
-
-    def presist_landing(self):
-        pass
-
-    def report(self):
-        pass
-
-
-project_config = config.project_config
-smard_source = config.sources["smard"]
-
-extractor = BatchExtractor(project_config, smard_source, BaseDownloader, None, None)
-extractor.prepare()
-extractor.plan()
+    def run(self):
+        self.prepare()
+        items = self.plan()
+        for pi in items:
+            self.fetch(pi)

@@ -14,7 +14,7 @@ class FileExtractor:
         source: SourceSpec,
         spark_session: SparkSession,
         dataset_name: str | None = None,
-        mode: str = "overwrite",
+        mode: str = "append",
     ):
         self.project_config = project_config
         self.source = source
@@ -25,7 +25,7 @@ class FileExtractor:
     def plan(self) -> list[PlanItem]:
         if self.dataset_name:
             pass
-        l = []
+        plan_item_list = []
         for dataset_name, dataset_cfg in self.source.datasets.items():
             if dataset_cfg.enabled:
                 # Rewrite this so plan item includes read options, each DatasetSpec may also contain the excel config
@@ -42,10 +42,11 @@ class FileExtractor:
                         "bronze",
                     ),
                     # Resolve and build here the list of ExcelReadTask
-                    excel_tasks=build_excel_read_plan(dataset_cfg.excel) or None,
+                    excel_tasks=build_excel_read_plan(dataset_cfg.excel),
+                    partitioning=dataset_cfg.destinations["bronze"].partitioning,
                 )
-                l.append(pi)
-        return l
+                plan_item_list.append(pi)
+        return plan_item_list
 
     def read_files(self, pi: PlanItem) -> list[Path]:
         path = Path(pi.input_path)
