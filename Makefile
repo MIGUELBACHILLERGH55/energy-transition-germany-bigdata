@@ -9,6 +9,9 @@ extract-eea:
 extract-opsd:
 	python -m src.extract.sources.opsd.run
 
+extract-smard-indices:
+	python -m src.extract.sources.smard.run.indices
+
 bronze: extract-ageb extract-eea extract-opsd
 
 clean-bronze:
@@ -31,4 +34,5 @@ clean-silver:
 silver: bronze transform-ageb transform-eea transform-opsd
 
 refresh-silver: clean-silver silver
+
 
