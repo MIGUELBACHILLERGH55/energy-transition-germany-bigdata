@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from src.extract.core.strategies.downloader_base import BaseDownloader
-from src.extract.core.planning.plan_item import PlanItem
+from src.extract.core.planning.index_task import IndexExtractionTask
 from src.io.json import write_json
 from src.io.http import fetch_json
 
@@ -11,10 +11,10 @@ from src.extract.sources.smard.parsers.indices import parse_available_indices_re
 
 @dataclass
 class SmardIndicesDownloader(BaseDownloader):
-    def prepare(self, pi: PlanItem):
+    def prepare(self, task: IndexExtractionTask):
         # 1. Prepare the endpoint
-        self.filter = pi.request_params["filter"]
-        self.resolution = pi.request_params["resolution"]
+        self.filter = task.request_params["filter"]
+        self.resolution = task.request_params["resolution"]
 
         endpoint = SmardIndicesEndpoint(
             base_endpoint=self.base_url,
@@ -27,10 +27,10 @@ class SmardIndicesDownloader(BaseDownloader):
         self.endpoint = endpoint_str
 
         # 2. Resolve the ouput path here too
-        self.output_path = pi.output_path
+        self.output_path = task.output_path
 
         # 3. Save the file name
-        self.dataset_name = pi.dataset_name
+        self.dataset_name = task.dataset_name
         self.file_name = f"{self.dataset_name}_available_indices_{self.resolution}_{self.run_date}.json"
 
     def download(self):
@@ -43,6 +43,6 @@ class SmardIndicesDownloader(BaseDownloader):
         )
         write_json(parsed_payload, self.output_path, self.file_name)
 
-    def fetch(self, pi: PlanItem):
-        self.prepare(pi)
+    def fetch(self, task: IndexExtractionTask):
+        self.prepare(task)
         self.download()
