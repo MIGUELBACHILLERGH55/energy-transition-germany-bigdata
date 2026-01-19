@@ -7,7 +7,7 @@ from src.config.paths import PROJECT_ROOT
 import requests
 from datetime import date, timedelta, time, datetime
 from src.extract.core.strategies.downloader_base import BaseDownloader
-from typing import Type
+from typing import Type, TypeVar, Generic
 from src.extract.core.planning.task import ExtractionTask
 
 """
@@ -31,8 +31,10 @@ This module contains no protocol-specific logic — all details are delegated
 to injected strategy classes.
 """
 
+TTask = TypeVar("TTask", bound=ExtractionTask)
 
-class BatchExtractor:
+
+class BatchExtractor(Generic[TTask]):
     def __init__(
         self,
         project_config: ProjectConfig,
@@ -71,10 +73,10 @@ class BatchExtractor:
             self.session = None
 
     @abstractmethod
-    def plan(self) -> list[ExtractionTask]:
+    def plan(self) -> list[TTask]:
         pass
 
-    def fetch(self, task: ExtractionTask):
+    def fetch(self, task: TTask):
         # create a downloader and init it with
         # session,base_url, timeout_s, retry
         # for plan_item in list_plan_items:
