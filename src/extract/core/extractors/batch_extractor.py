@@ -1,13 +1,14 @@
 # src/extract/core/extractors/batch_extractor.py
+from abc import abstractmethod
 from src.config.loader import ProjectConfig
 from src.config.models.source_models import SourceSpec, DatasetSpec
-from src.extract.core.planning.plan_item import PlanItem
 from src.io.path_resolver import resolve_layer_root
 from src.config.paths import PROJECT_ROOT
 import requests
 from datetime import date, timedelta, time, datetime
 from src.extract.core.strategies.downloader_base import BaseDownloader
 from typing import Type
+from src.extract.core.planning.task import ExtractionTask
 
 """
 Batch Extractor
@@ -37,14 +38,16 @@ class BatchExtractor:
         project_config: ProjectConfig,
         source: SourceSpec,
         downloader_cls: Type[BaseDownloader],
-        run_date: date | None = None,
+        start_date: date | None,
+        end_date: date | None,
     ):
         self.project_config = project_config
         self.source = source
         self.downloader_cls = downloader_cls
-        self.run_date = run_date or date.today()
+        self.run_date = date.today()
+        self.start_date = start_date
+        self.end_date = end_date
         self.safety_lag_days = source.availability_lag_days
-        self.effective_date = self.run_date - timedelta(days=self.safety_lag_days)
 
     def prepare(self):
         active_env = self.project_config.active_env
@@ -67,32 +70,19 @@ class BatchExtractor:
         else:
             self.session = None
 
-    def plan(self) -> list[PlanItem]:
-        source_name = self.source.name
-        plan_item_list = []
-        for ds_name, dataset_cfg in self.source.datasets.items():
-            pi = PlanItem(
-                source_name=source_name,
-                dataset_name=dataset_cfg.name,
-                dataset_id=dataset_cfg.metadata.dataset_id,
-                start_ts=datetime.combine(self.effective_date, time(0, 0)),
-                end_ts=datetime.combine(self.effective_date, time(23, 0)),
-                request_params=dataset_cfg.request,
-                output_path=dataset_cfg.destinations["bronze"].path,
-                input_format=dataset_cfg.storage["format"],
-            )
-            plan_item_list.append(pi)
-        return plan_item_list
+    @abstractmethod
+    def plan(self) -> list[ExtractionTask]:
+        pass
 
-    def fetch(self, pi: PlanItem):
+    def fetch(self, task: ExtractionTask):
         # create a downloader and init it with
         # session,base_url, timeout_s, retry
         # for plan_item in list_plan_items:
         #     downloader.download(plan_item)
-        self.downloader.fetch(pi)
+        self.downloader.fetch(task)
 
     def run(self):
         self.prepare()
         items = self.plan()
-        for pi in items:
-            self.fetch(pi)
+        for task in items:
+            self.fetch(task)
