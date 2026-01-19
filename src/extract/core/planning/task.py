@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, Dict, Any
 
 
 @dataclass
@@ -14,3 +15,4 @@ class ExtractionTask:
     source_name: str
     dataset_name: str
     output_path: Path
+    request_params: Optional[Dict[str, Any]] = None
