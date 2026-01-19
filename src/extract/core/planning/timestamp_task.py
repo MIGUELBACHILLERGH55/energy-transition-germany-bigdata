@@ -1,10 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from .task import ExtractionTask
+from .api_task import APIExtractionTask
 
 
 @dataclass
-class TimestampExtractionTask(ExtractionTask):
+class TimestampExtractionTask(APIExtractionTask):
     """
     Extraction task defined by a single timestamp in milliseconds.
 
@@ -12,4 +12,4 @@ class TimestampExtractionTask(ExtractionTask):
     to an exact available timestamp.
     """
 
-    timestamp_ms: int
+    timestamp_ms: int = field(kw_only=True)

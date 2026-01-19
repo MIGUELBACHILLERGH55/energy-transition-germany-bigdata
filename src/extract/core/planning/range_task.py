@@ -1,19 +1,15 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, Optional
-
-from .task import ExtractionTask
+from .api_task import APIExtractionTask
 
 
 @dataclass
-class RangeExtractionTask(ExtractionTask):
+class RangeExtractionTask(APIExtractionTask):
     """
     Extraction task defined by a time window.
 
     Typical for API-based datasets queried by start/end timestamps.
     """
 
-    start_ts: datetime
-    end_ts: datetime
-
-    request_params: Optional[Dict] = None
+    start_ts: datetime = field(kw_only=True)
+    end_ts: datetime = field(kw_only=True)
