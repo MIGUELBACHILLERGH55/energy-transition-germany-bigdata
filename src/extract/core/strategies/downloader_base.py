@@ -2,7 +2,7 @@ from abc import abstractmethod
 import requests
 from dataclasses import dataclass
 from datetime import date
-from src.extract.core.planning.plan_item import PlanItem
+from src.extract.core.planning.task import ExtractionTask
 
 
 @dataclass
@@ -14,13 +14,13 @@ class BaseDownloader:
     run_date: date
 
     @abstractmethod
-    def prepare(self, pi: PlanItem):
+    def prepare(self, task: ExtractionTask):
         pass
 
     @abstractmethod
     def download(self):
         pass
 
-    def fetch(self, pi: PlanItem):
-        self.prepare(pi)
+    def fetch(self, task: ExtractionTask):
+        self.prepare(task)
         self.download()
