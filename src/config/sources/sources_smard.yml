@@ -52,6 +52,7 @@ smard:
           path: "smard/prices/" # Where raw JSON is stored (data/bronze/ + this)
         silver:
           path: "smard/prices/" # Cleaned/structured version
+          partitioning: ["data_date"]
         gold:
           path: "smard/prices_daily/" # Aggregated daily parquet
           format: parquet
@@ -83,7 +84,8 @@ smard:
         bronze:
           path: "smard/generation/lignite/"
         silver:
-          path: "smard/generation/lignite/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     nuclear_energy:
@@ -109,7 +111,8 @@ smard:
         bronze:
           path: "smard/generation/nuclear_energy/"
         silver:
-          path: "smard/generation/nuclear_energy/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     wind_offshore:
@@ -135,7 +138,8 @@ smard:
         bronze:
           path: "smard/generation/wind_offshore/"
         silver:
-          path: "smard/generation/wind_offshore/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     hydroelectricity:
@@ -161,7 +165,8 @@ smard:
         bronze:
           path: "smard/generation/hydroelectricity/"
         silver:
-          path: "smard/generation/hydroelectricity/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     other_conventional:
@@ -187,7 +192,8 @@ smard:
         bronze:
           path: "smard/generation/other_conventional/"
         silver:
-          path: "smard/generation/other_conventional/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     other_renewables:
@@ -213,7 +219,8 @@ smard:
         bronze:
           path: "smard/generation/other_renewables/"
         silver:
-          path: "smard/generation/other_renewables/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     biomass:
@@ -239,7 +246,8 @@ smard:
         bronze:
           path: "smard/generation/biomass/"
         silver:
-          path: "smard/generation/biomass/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     wind_onshore:
@@ -265,7 +273,8 @@ smard:
         bronze:
           path: "smard/generation/wind_onshore/"
         silver:
-          path: "smard/generation/wind_onshore/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     # Solar PV
@@ -292,7 +301,8 @@ smard:
         bronze:
           path: "smard/generation/photovoltaics/"
         silver:
-          path: "smard/generation/photovoltaics/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     hard_coal:
@@ -318,7 +328,8 @@ smard:
         bronze:
           path: "smard/generation/hard_coal/"
         silver:
-          path: "smard/generation/hard_coal/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     pumped_storage:
@@ -344,7 +355,8 @@ smard:
         bronze:
           path: "smard/generation/pumped_storage/"
         silver:
-          path: "smard/generation/pumped_storage/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
 
     natural_gas:
@@ -370,5 +382,6 @@ smard:
         bronze:
           path: "smard/generation/natural_gas/"
         silver:
-          path: "smard/generation/natural_gas/"
+          path: "smard/generation/"
+          partitioning: ["data_date"]
           format: parquet
