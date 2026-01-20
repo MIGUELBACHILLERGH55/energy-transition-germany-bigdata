@@ -29,7 +29,7 @@ def parse_timeseries_response(
 
                 result["meta"]["data_date"] = date.fromtimestamp(
                     last_available["timestamps_ms"] / 1000
-                )
+                ).isoformat()
 
                 break
     elif mode == "range":

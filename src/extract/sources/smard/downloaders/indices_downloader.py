@@ -31,7 +31,7 @@ class SmardIndicesDownloader(BaseDownloader):
 
         # 3. Save the file name
         self.dataset_name = task.dataset_name
-        self.file_name = f"{self.dataset_name}_available_indices_{self.resolution}_{self.run_date}.json"
+        self.file_name = f"{self.dataset_name}_available_indices_{self.resolution}_run={self.run_date}.json"
 
     def download(self):
         response = fetch_json(self.endpoint)
