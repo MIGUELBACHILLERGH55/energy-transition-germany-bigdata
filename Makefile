@@ -12,7 +12,15 @@ extract-opsd:
 extract-smard-indices:
 	python -m src.extract.sources.smard.run.indices
 
-bronze: extract-ageb extract-eea extract-opsd
+clean-smard-indices:
+	rm -rf data/landing/smard
+
+refresh-smard-indices: clean-smard-indices extract-smard-indices
+
+extract-smard-last-available-ts:
+	python -m src.extract.sources.smard.run.timeseries
+
+bronze: extract-ageb extract-eea extract-opsd extract-smard-last-available-ts
 
 clean-bronze:
 	rm -rf data/bronze
