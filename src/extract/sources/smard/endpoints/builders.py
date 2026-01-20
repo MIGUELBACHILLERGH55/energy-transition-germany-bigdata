@@ -28,7 +28,7 @@ def build_time_series_data_endpoint(endpoint: SmardTimeseriesEndpoint) -> str:
     Returns:
         str: Well-formatted API URL pointing to the time seties JSON file.
     """
-    return f"{endpoint.base_endpoint}/chart_data/{endpoint.filter}/{endpoint.region}/{endpoint.filter}_{endpoint.region}_{endpoint.resolution}_{endpoint.timestamp}.json"
+    return f"{endpoint.base_endpoint}/chart_data/{endpoint.filter}/{endpoint.region}/{endpoint.filter}_{endpoint.region}_{endpoint.resolution}_{endpoint.timestamp_ts}.json"
 
 
 def build_time_series_data_endpoint_json(endpoint: SmardTimeseriesEndpoint) -> str:
@@ -42,7 +42,7 @@ def build_time_series_data_endpoint_json(endpoint: SmardTimeseriesEndpoint) -> s
         str: Fully constructed API URL pointing to the time series JSON file
             under the ``table_data`` path.
     """
-    return f"{endpoint.base_endpoint}/table_data/{endpoint.filter}/{endpoint.region}/{endpoint.filter}_{endpoint.region}_quarterhour_{endpoint.timestamp}.json"
+    return f"{endpoint.base_endpoint}/table_data/{endpoint.filter}/{endpoint.region}/{endpoint.filter}_{endpoint.region}_quarterhour_{endpoint.timestamp_ts}.json"
 
 
 def ts_to_datetime(ts: int, timezone=timezone.utc) -> datetime:
