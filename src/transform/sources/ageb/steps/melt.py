@@ -1,24 +1,12 @@
-def melt_df(df):
-    years = [
-        col
-        for col in df.columns
-        if col.isdigit() and col not in ("energy_source", "unit", "indicator")
-    ]
+from pyspark.sql import DataFrame
 
-    if "energy_source" in df.columns:
-        df = df.melt(
-            ids=["energy_source", "unit"],
-            values=years,
-            variableColumnName="year",
-            valueColumnName="value",
-        )
 
-    elif "indicator" in df.columns:
-        df = df.melt(
-            ids=["indicator", "unit"],
-            values=years,
-            variableColumnName="year",
-            valueColumnName="value",
-        )
+def melt_df(df: DataFrame, value_col: str) -> DataFrame:
+    years = [c for c in df.columns if c.isdigit()]
 
-    return df
+    return df.melt(
+        ids=[value_col, "unit"],
+        values=years,
+        variableColumnName="year",
+        valueColumnName="value",
+    )

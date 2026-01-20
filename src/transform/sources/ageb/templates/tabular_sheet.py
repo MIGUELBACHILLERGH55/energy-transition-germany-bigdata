@@ -38,7 +38,7 @@ def normalize_and_melt(
         if verbose:
             print("4. Normalized values using mapping.")
 
-    df = melt_df(df)
+    df = melt_df(df, value_col)
     if verbose:
         print("5. Melted dataframe.")
 
