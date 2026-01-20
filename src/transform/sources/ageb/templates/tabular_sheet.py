@@ -21,24 +21,24 @@ def normalize_and_melt(
             print("1. Dropped columns:", drop_cols)
 
     if value_col == "energy_source":
-        df = rename_cols(df, {"Energy source": value_col, "Units": "units"})
+        df = rename_cols(df, {"Energy source": "dimension", "Units": "units"})
     elif value_col == "indicator":
-        df = rename_cols(df, {"Indicator": value_col, "Units": "units"})
+        df = rename_cols(df, {"Indicator": "dimension", "Units": "units"})
 
     if verbose:
         print("2. Renamed columns.")
 
     if filter_total:
-        df = df.filter(~df[value_col].contains("Total"))
+        df = df.filter(~df["dimension"].contains("Total"))
         if verbose:
             print("3. Filtered aggregation rows.")
 
     if replace_map:
-        df = df.replace(to_replace=replace_map, subset=[value_col])
+        df = df.replace(to_replace=replace_map, subset=["dimension"])
         if verbose:
             print("4. Normalized values using mapping.")
 
-    df = melt_df(df, value_col)
+    df = melt_df(df)
     if verbose:
         print("5. Melted dataframe.")
 
