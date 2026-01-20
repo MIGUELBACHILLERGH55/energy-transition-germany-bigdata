@@ -37,7 +37,13 @@ class EnergyMixTotal:
 
     def write(self, df: DataFrame):
         output_path: Path = resolve_gold_dataset_path("energy_mix_total")
-        df.coalesce(1).write.mode("overwrite").csv(output_path.as_posix())
+        (
+            df.coalesce(1)
+            .write.mode("overwrite")
+            .option("header", "true")
+            .option("delimiter", ",")
+            .csv(output_path.as_posix())
+        )
 
         # Find the part file and rename it
         part_file = next(output_path.glob("part*.csv"))
