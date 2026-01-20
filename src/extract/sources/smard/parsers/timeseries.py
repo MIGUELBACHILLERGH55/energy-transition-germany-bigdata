@@ -17,6 +17,7 @@ def parse_timeseries_response(
     result["meta"]["filter_id"] = filter_value
     result["meta"]["resolution"] = resolution
     result["meta"]["run_date"] = run_date
+    result["meta"]["mode"] = mode
 
     if mode == "last_available":
         last_available = None
@@ -25,6 +26,10 @@ def parse_timeseries_response(
             if value is not None:
                 last_available = {"timestamps_ms": ts, "value": value}
                 result["data"] = [last_available]
+
+                result["meta"]["data_date"] = date.fromtimestamp(
+                    last_available["timestamps_ms"] / 1000
+                )
 
                 break
     elif mode == "range":
