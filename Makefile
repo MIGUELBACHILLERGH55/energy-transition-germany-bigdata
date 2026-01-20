@@ -36,10 +36,13 @@ transform-eea:
 transform-opsd:
 	python -m src.transform.sources.opsd.run
 
+transform-smard:
+	python -m src.transform.sources.smard.run
+
 clean-silver:
 	rm -rf data/silver
 
-silver: bronze transform-ageb transform-eea transform-opsd
+silver: bronze transform-ageb transform-eea transform-opsd transform-smard
 
 refresh-silver: clean-silver silver
 
