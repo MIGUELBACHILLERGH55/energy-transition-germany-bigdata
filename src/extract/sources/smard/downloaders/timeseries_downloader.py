@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from src.extract.core.strategies.downloader_base import BaseDownloader
 from src.extract.core.planning.timestamp_task import TimestampExtractionTask
-from src.io.json import write_json
 from src.io.http import fetch_json
-from datetime import date
 
 from src.extract.sources.smard.parsers.timeseries import parse_timeseries_response
 from src.extract.sources.smard.models.endpoint import SmardTimeseriesEndpoint
@@ -39,11 +37,6 @@ class SmardTimeseriesDownloader(BaseDownloader):
         # 2. Resolve the ouput path here too
         self.output_path = task.output_path
 
-        # 3. Save the file name if we do not need the effective_date
-        self.dataset_name = task.dataset_name
-        if self.start_date and self.end_date:
-            self.file_name = f"{self.dataset_name}_{self.resolution}_run={self.start_date}_{self.end_date}_{self.run_date}.json"
-
     def download(self):
         response = fetch_json(self.endpoint)
 
@@ -70,8 +63,8 @@ class SmardTimeseriesDownloader(BaseDownloader):
                 f"run={self.run_date}.json"
             )
 
-        write_json(parsed_payload, self.output_path, self.file_name)
+        return parsed_payload
 
     def fetch(self, task: TimestampExtractionTask):
         self.prepare(task)
-        self.download()
+        return self.download()

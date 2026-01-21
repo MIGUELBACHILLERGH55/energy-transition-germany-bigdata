@@ -33,21 +33,17 @@ def parse_timeseries_response(
 
                 break
     elif mode == "range":
-        # To do
         data = response["series"]
-        ts_list = [item[0] for item in data]
 
-        date_list = [date.fromtimestamp(ts / 1000) for ts in ts_list]
+        parsed = []
+        for ts, value in data:
+            if value is None:
+                continue
 
-        index_list = []
-        for index, date_rg in enumerate(date_list):
-            if start_date <= date_rg <= end_date:
-                index_list.append(index)
+            point_date = date.fromtimestamp(ts / 1000)
 
-        selected_data = data[index_list[0] :: index_list[-1]]
+            parsed.append({"timestamps_ms": ts, "value": value})
 
-        data = [{"timestamps_ms": item[0], "value": item[1]} for item in selected_data]
-
-        result["data"] = data
+        result["data"] = parsed
 
     return result
