@@ -24,21 +24,16 @@ eurostat:
         format: csv
         file_name: "ENRGY0DEM086NEST.csv"
 
-      metadata:
-        dataset_id: "eurostat.hicp.energy.de"
-        description: "Harmonized Index of Consumer Prices (HICP): Energy for Germany"
-        country: "DE"
-        unit: "index_2015_100"
-        source_resolution: "month"
-        granularity: monthly
-        tz: "UTC"
-        schedule: monthly
-        source: "Eurostat (via FRED)"
-        notes: >
-          Index of consumer energy prices for Germany.
-          Base year 2015=100. Values represent relative price levels,
-          not absolute prices. Covers electricity, gas,
-          fuels and heat energy for households.
+        metadata:
+          dataset_id: "eurostat.hicp.energy.de"
+          description: "Harmonized Index of Consumer Prices (HICP): Energy for Germany"
+          country: "DE"
+          source_resolution: "month"
+          granularity: "monthly"
+          tz: "UTC"
+          schedule: "monthly"
+          format: "csv"
+          unit: 100
 
       destinations:
         bronze:
