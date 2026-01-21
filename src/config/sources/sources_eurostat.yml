@@ -1,0 +1,50 @@
+eurostat:
+  # ------------------------------------------------------------
+  # Eurostat — Harmonized Index of Consumer Prices (HICP)
+  # Energy for Germany
+  # ------------------------------------------------------------
+  # File-based ingestion.
+  # The dataset is manually downloaded from FRED
+  # (original source: Eurostat) and stored as a CSV
+  # inside `data/landing/eurostat`.
+  #
+  # This series provides a long-run macroeconomic view of
+  # household energy prices (index, base year 2015=100).
+  # ------------------------------------------------------------
+  enabled: true
+  kind: file
+
+  datasets:
+    hicp_energy_index:
+      enabled: true
+      access: file
+
+      storage:
+        path: "eurostat/"
+        format: csv
+        file_name: "ENRGY0DEM086NEST.csv"
+
+      metadata:
+        dataset_id: "eurostat.hicp.energy.de"
+        description: "Harmonized Index of Consumer Prices (HICP): Energy for Germany"
+        country: "DE"
+        unit: "index_2015_100"
+        source_resolution: "month"
+        granularity: monthly
+        tz: "UTC"
+        schedule: monthly
+        source: "Eurostat (via FRED)"
+        notes: >
+          Index of consumer energy prices for Germany.
+          Base year 2015=100. Values represent relative price levels,
+          not absolute prices. Covers electricity, gas,
+          fuels and heat energy for households.
+
+      destinations:
+        bronze:
+          path: "eurostat/hicp_energy_index_raw/"
+          format: parquet
+
+        silver:
+          path: "eurostat/hicp_energy_index_monthly/"
+          format: parquet
