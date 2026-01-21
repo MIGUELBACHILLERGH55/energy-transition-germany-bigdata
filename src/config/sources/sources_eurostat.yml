@@ -24,16 +24,16 @@ eurostat:
         format: csv
         file_name: "ENRGY0DEM086NEST.csv"
 
-        metadata:
-          dataset_id: "eurostat.hicp.energy.de"
-          description: "Harmonized Index of Consumer Prices (HICP): Energy for Germany"
-          country: "DE"
-          source_resolution: "month"
-          granularity: "monthly"
-          tz: "UTC"
-          schedule: "monthly"
-          format: "csv"
-          unit: 100
+      metadata:
+        dataset_id: "eurostat.hicp.energy.de"
+        description: "Harmonized Index of Consumer Prices (HICP): Energy for Germany"
+        country: "DE"
+        source_resolution: "month"
+        granularity: "monthly"
+        tz: "UTC"
+        schedule: "monthly"
+        format: "csv"
+        unit: 100
 
       destinations:
         bronze:
