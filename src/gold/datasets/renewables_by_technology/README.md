@@ -37,7 +37,6 @@ Values are expressed in petajoules (PJ).
 | technology  | Renewable technology (e.g. wind, solar_pv, biomass) |
 | value       | Annual energy production |
 | unit        | Measurement unit (PJ) |
-| table_id    | Original AGEB table identifier |
 | dataset     | Gold dataset identifier |
 
 ## Visualizations
@@ -49,4 +48,3 @@ Values are expressed in petajoules (PJ).
 ## Notes
 
 - Dataset is designed to complement energy mix and sectoral consumption datasets
-- Shares can be computed downstream if needed (e.g. technology share of total renewables)

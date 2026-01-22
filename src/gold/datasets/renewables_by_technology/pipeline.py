@@ -34,7 +34,6 @@ class RenewablesByTechnology:
             "technology",
             "value",
             "unit",
-            "table_id",
             "dataset",
         )
 

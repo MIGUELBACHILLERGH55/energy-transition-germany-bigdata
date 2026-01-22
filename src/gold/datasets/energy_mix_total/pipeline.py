@@ -33,7 +33,26 @@ class EnergyMixTotal:
         )
         df_final = df_final.drop("total_per_year")
 
-        return df_final
+        df_energy = (
+            df_final.select("year", "dimension", "value", "dataset")
+            .withColumn("metric", sf.lit("energy"))
+            .withColumn("unit", sf.lit("PJ"))
+        )
+
+        df_share = (
+            df_final.select("year", "dimension", "share", "dataset")
+            .withColumnRenamed("share", "value")
+            .withColumn("metric", sf.lit("share"))
+            .withColumn("unit", sf.lit("ratio"))
+        )
+
+        df_long = (
+            df_energy.unionByName(df_share)
+            .select("year", "dimension", "metric", "value", "unit", "dataset")
+            .orderBy("year", "dimension", "metric")
+        )
+
+        return df_long
 
     def write(self, df: DataFrame):
         output_path: Path = resolve_gold_dataset_path("energy_mix_total")

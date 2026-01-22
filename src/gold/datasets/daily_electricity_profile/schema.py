@@ -8,7 +8,7 @@ from pyspark.sql.types import (
     DateType,
 )
 
-DAILY_ELECTRICITY_PROFILE_SCHEMA = StructType(
+DAILY_ELECTRICITY_METRICS_SCHEMA = StructType(
     [
         # temporal dimensions
         StructField("date", DateType(), False),
@@ -17,15 +17,10 @@ DAILY_ELECTRICITY_PROFILE_SCHEMA = StructType(
         StructField("month_name", StringType(), False),
         StructField("day_of_week", StringType(), False),
         StructField("is_weekend", BooleanType(), False),
-        # core metrics
-        StructField("load_act_daily", DoubleType(), False),
-        StructField("solar_gen_daily", DoubleType(), False),
-        StructField("wind_gen_daily", DoubleType(), False),
-        StructField("renewables_gen_daily", DoubleType(), False),
-        # derived metrics (shares)
-        StructField("renewables_share", DoubleType(), False),
-        StructField("solar_share", DoubleType(), False),
-        StructField("wind_share", DoubleType(), False),
+        # metric dimensions
+        StructField("metric", StringType(), False),
+        StructField("value", DoubleType(), False),
+        StructField("unit", StringType(), False),
         # metadata
         StructField("dataset", StringType(), False),
     ]
