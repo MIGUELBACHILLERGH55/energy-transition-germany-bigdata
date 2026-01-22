@@ -30,28 +30,67 @@ class EnergyIntensityIndicators:
         return df
 
     def transform(self, df: DataFrame) -> DataFrame:
-        # Do some things here
+        # --------------------------------------------------
+        # STEP 0: Dataset tag
+        # --------------------------------------------------
         df = df.withColumn("dataset", sf.lit("energy_intensity_indicators"))
 
+        # --------------------------------------------------
+        # STEP 1: Rename dimension -> indicator_code
+        # --------------------------------------------------
+        df = df.withColumnRenamed("dimension", "indicator_code")
+
+        # --------------------------------------------------
+        # STEP 2: Enrich with indicator metadata
+        # --------------------------------------------------
         df = df.withColumn(
             "indicator_label",
             sf.create_map([sf.lit(x) for x in sum(INDICATOR_LABEL_MAP.items(), ())])[
-                sf.col("dimension")
+                sf.col("indicator_code")
             ],
         )
 
         df = df.withColumn(
             "indicator_group",
             sf.create_map([sf.lit(x) for x in sum(INDICATOR_GROUP_MAP.items(), ())])[
-                sf.col("dimension")
+                sf.col("indicator_code")
             ],
         )
 
         df = df.withColumn(
             "indicator_scope",
             sf.create_map([sf.lit(x) for x in sum(INDICATOR_SCOPE_MAP.items(), ())])[
-                sf.col("dimension")
+                sf.col("indicator_code")
             ],
+        )
+
+        # --------------------------------------------------
+        # STEP 3: Drop technical columns
+        # --------------------------------------------------
+        df = df.drop("table_id")
+
+        # --------------------------------------------------
+        # STEP 4: Reorder columns (Power BI friendly)
+        # --------------------------------------------------
+        df = df.select(
+            "year",
+            "indicator_scope",
+            "indicator_group",
+            "indicator_code",
+            "indicator_label",
+            "value",
+            "unit",
+            "dataset",
+        )
+
+        # --------------------------------------------------
+        # STEP 5: Stable ordering
+        # --------------------------------------------------
+        df = df.orderBy(
+            "indicator_scope",
+            "indicator_group",
+            "indicator_code",
+            "year",
         )
 
         return df

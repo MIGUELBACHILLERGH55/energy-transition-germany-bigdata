@@ -24,6 +24,9 @@ class DailyElectricityProfile:
         return df
 
     def transform(self, df: DataFrame) -> DataFrame:
+        # --------------------------------------------------
+        # STEP 1: Prepare base daily aggregates
+        # --------------------------------------------------
         df = df.withColumnRenamed("event_date_utc", "date")
 
         df = df.groupBy("date").agg(
@@ -54,6 +57,11 @@ class DailyElectricityProfile:
             )
         )
 
+        df = df.dropna(subset=["load_act_daily"])
+
+        # --------------------------------------------------
+        # STEP 2: Calendar dimensions
+        # --------------------------------------------------
         df = (
             df.withColumn("year", sf.year("date"))
             .withColumn("month", sf.month("date"))
@@ -62,34 +70,63 @@ class DailyElectricityProfile:
             .withColumn("is_weekend", sf.dayofweek("date").isin([1, 7]))
         )
 
-        df = df.dropna(subset="load_act_daily")
+        # --------------------------------------------------
+        # STEP 3: LONG format — energy metrics (MWh)
+        # --------------------------------------------------
+        energy_metrics = [
+            "load_act_daily",
+            "solar_gen_daily",
+            "wind_gen_daily",
+            "renewables_gen_daily",
+        ]
 
-        df = df.withColumn("dataset", sf.lit("daily_electricity_profile"))
-
-        daily_cols = (
+        df_energy = df.select(
             "date",
             "year",
             "month",
             "month_name",
             "day_of_week",
             "is_weekend",
-            "load_act_daily",
-            "solar_gen_daily",
-            "wind_gen_daily",
-            "renewables_gen_daily",
+            sf.expr(
+                f"stack({len(energy_metrics)}, "
+                + ", ".join([f"'{m}', {m}" for m in energy_metrics])
+                + ") as (metric, value)"
+            ),
+        ).withColumn("unit", sf.lit("MWh"))
+
+        # --------------------------------------------------
+        # STEP 4: LONG format — share metrics (ratio)
+        # --------------------------------------------------
+        share_metrics = [
             "renewables_share",
             "solar_share",
             "wind_share",
-            "dataset",
+        ]
+
+        df_share = df.select(
+            "date",
+            "year",
+            "month",
+            "month_name",
+            "day_of_week",
+            "is_weekend",
+            sf.expr(
+                f"stack({len(share_metrics)}, "
+                + ", ".join([f"'{m}', {m}" for m in share_metrics])
+                + ") as (metric, value)"
+            ),
+        ).withColumn("unit", sf.lit("ratio"))
+
+        # --------------------------------------------------
+        # STEP 5: Union + final polish
+        # --------------------------------------------------
+        df_long = (
+            df_energy.unionByName(df_share)
+            .withColumn("dataset", sf.lit("daily_electricity_metrics"))
+            .orderBy("date", "metric")
         )
 
-        df = df.select(*daily_cols)
-
-        df = df.sort("date")
-
-        df.show()
-
-        return df
+        return df_long
 
     def write(self, df: DataFrame):
         output_path: Path = resolve_gold_dataset_path("daily_electricity_profile")

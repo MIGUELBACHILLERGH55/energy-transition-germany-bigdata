@@ -29,37 +29,61 @@ class FinalEnergyConsumptionBySector:
         return df
 
     def transform(self, df: DataFrame) -> DataFrame:
-        df = df.withColumn("dataset", sf.lit("energy_intensity_indicators"))
+        # --------------------------------------------------
+        # STEP 0: Dataset tag
+        # --------------------------------------------------
+        df = df.withColumn("dataset", sf.lit("final_energy_consumption_by_sector"))
 
+        # --------------------------------------------------
+        # STEP 1: Derive sector & rename dimension
+        # --------------------------------------------------
         df = df.withColumn(
             "sector",
             sf.create_map([sf.lit(x) for x in sum(SECTOR_MAP.items(), ())])[
                 sf.col("table_id")
             ],
         )
+
         df = df.withColumnRenamed("dimension", "energy_source")
 
-        w_sector_year = Window.partitionBy("year", "sector")
-
-        df = df.withColumn(
-            "share", sf.col("value") / sf.sum("value").over(w_sector_year)
-        )
-
-        final_energy_consumption_by_sector_cols = (
+        # --------------------------------------------------
+        # STEP 2: Energy metric (absolute values)
+        # --------------------------------------------------
+        df_energy = df.select(
             "year",
             "sector",
             "energy_source",
-            "value",
-            "unit",
-            "table_id",
-            "dataset",
+            sf.lit("energy").alias("metric"),
+            sf.col("value"),
+            sf.col("unit"),
         )
 
-        df = df.select(*final_energy_consumption_by_sector_cols)
+        # --------------------------------------------------
+        # STEP 3: Share metric (within sector & year)
+        # --------------------------------------------------
+        w_sector_year = Window.partitionBy("year", "sector")
 
-        df = df.orderBy("year", "sector", "energy_source")
+        df_share = df.withColumn(
+            "value", sf.col("value") / sf.sum("value").over(w_sector_year)
+        ).select(
+            "year",
+            "sector",
+            "energy_source",
+            sf.lit("share").alias("metric"),
+            "value",
+            sf.lit("ratio").alias("unit"),
+        )
 
-        return df
+        # --------------------------------------------------
+        # STEP 4: Union + final polish
+        # --------------------------------------------------
+        df_final = (
+            df_energy.unionByName(df_share)
+            .withColumn("dataset", sf.lit("final_energy_consumption_by_sector"))
+            .orderBy("year", "sector", "energy_source", "metric")
+        )
+
+        return df_final
 
     def write(self, df: DataFrame):
         output_path: Path = resolve_gold_dataset_path(

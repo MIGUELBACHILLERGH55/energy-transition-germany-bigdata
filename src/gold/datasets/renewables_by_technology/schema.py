@@ -15,7 +15,6 @@ RENEWABLES_BY_TECHNOLOGY_SCHEMA = StructType(
         StructField("value", DoubleType(), False),
         StructField("unit", StringType(), False),
         # technical metadata
-        StructField("table_id", StringType(), False),
         StructField("dataset", StringType(), False),
     ]
 )
