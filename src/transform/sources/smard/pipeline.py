@@ -2,7 +2,7 @@
 from pyspark.sql import DataFrame, Row
 from src.transform.core.pipelines.batch_transformer import BatchTransformerPipeline
 import json
-from datetime import date
+from datetime import date, datetime, timezone
 
 
 from pathlib import Path
@@ -35,18 +35,20 @@ class SmardTimeseriesPipeline(BatchTransformerPipeline):
                 if value is None:
                     continue
 
-                data_date = date.fromisoformat(meta["data_date"])
+                ts_dt = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
+                event_date = ts_dt.date()
+
                 run_date = date.fromisoformat(meta["run_date"])
 
                 rows.append(
                     Row(
-                        timestamp=ts_ms,
-                        value=value,
+                        timestamp=ts_dt,
+                        event_date=event_date,
+                        run_date=run_date,
                         dataset_name=meta["dataset"],
                         filter_id=meta["filter_id"],
                         resolution=meta["resolution"],
-                        data_date=data_date,
-                        run_date=run_date,
+                        value=value,
                     )
                 )
 
@@ -58,13 +60,22 @@ class SmardTimeseriesPipeline(BatchTransformerPipeline):
     def write_silver(self, ds_name: str, df: DataFrame) -> None:
         ds = self.source.datasets[ds_name]
         silver_path = resolve_output_path(self.project_config, ds, layer="silver")
-        (df.write.mode("append").partitionBy("data_date").parquet(str(silver_path)))
+        (
+            df.write.mode("append")
+            .partitionBy("dataset_name", "event_date")
+            .parquet(str(silver_path))
+        )
 
     def run(self) -> None:
         bronze_paths = self.read_bronze_paths()
 
         for ds_name, bronze_paths in bronze_paths.items():
+            print(f"[SMARD] ▶ Processing dataset: {ds_name}")
+
             for path in bronze_paths:
+                print(f"[SMARD]   Bronze path: {path}")
                 df = self.read_bronze(path)
+                print(f"[SMARD]   Rows read: {df.count()}")
+
                 df2 = self.apply_steps(ds_name, df)
                 self.write_silver(ds_name, df2)
