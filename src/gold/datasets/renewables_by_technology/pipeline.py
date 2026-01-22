@@ -25,6 +25,7 @@ class RenewablesByTechnology:
         return df
 
     def transform(self, df: DataFrame) -> DataFrame:
+        df = df.withColumn("year", sf.col("year").cast("int"))
         df = df.withColumn("dataset", sf.lit("renewables_by_technology"))
 
         df = df.withColumnRenamed("dimension", "technology")

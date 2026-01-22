@@ -30,6 +30,8 @@ class EnergyIntensityIndicators:
         return df
 
     def transform(self, df: DataFrame) -> DataFrame:
+        # Ensure year is numeric
+        df = df.withColumn("year", sf.col("year").cast("int"))
         # --------------------------------------------------
         # STEP 0: Dataset tag
         # --------------------------------------------------

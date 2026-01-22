@@ -56,6 +56,12 @@ class LatestEnergyDay:
         df = df.filter(sf.to_date("timestamp") == sf.lit(latest_day))
 
         # --------------------------------------------------
+        # STEP 2.5: Explicit date & hour (BI-friendly)
+        # --------------------------------------------------
+        df = df.withColumn("date", sf.to_date("timestamp")).withColumn(
+            "hour", sf.hour("timestamp")
+        )
+        # --------------------------------------------------
         # STEP 3: Keep only load & price
         # --------------------------------------------------
         df = df.filter(sf.col("dataset_name").isin(["load", "prices"]))
@@ -94,8 +100,6 @@ class LatestEnergyDay:
             "dataset_name",
             "event_date",
         )
-
-        df.filter(sf.col("metric") == "price").show()
 
         return df
 
