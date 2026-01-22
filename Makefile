@@ -62,7 +62,7 @@ gold-energy-mix-total:
 	python -m src.gold.datasets.energy_mix_total.run
 
 gold-energy-intensity-indicators:
-	python -m src.gold.datasets.energy_intesity_indicators.run
+	python -m src.gold.datasets.energy_intensity_indicators.run
 
 gold-final-energy-consumption-by-sector:
 	python -m src.gold.datasets.final_energy_consumption_by_sector.run
