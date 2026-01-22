@@ -58,4 +58,19 @@ silver: bronze transform-ageb transform-eea transform-opsd transform-smard trans
 
 refresh-silver: clean-silver silver
 
+gold-energy-mix-total:
+	python -m src.gold.datasets.energy_mix_total.run
+
+gold-energy-intensity-indicators:
+	python -m src.gold.datasets.energy_intesity_indicators.run
+
+gold-final-energy-consumption-by-sector:
+	python -m src.gold.datasets.final_energy_consumption_by_sector.run
+
+gold-renewables-by-technology:
+	python -m src.gold.datasets.renewables_by_technology.run
+
+
+gold: bronze silver gold-energy-mix-total gold-energy-intensity-indicators gold-final-energy-consumption-by-sector gold-renewables-by-technology
+
 
