@@ -15,6 +15,8 @@
 	gold-renewables-by-technology \
 	gold-daily-electricity-profile \
 	gold-latest-energy-day \
+	gold-electricity-price-trends-monthly \
+	gold-nuclear-exit-context-monthly \
 	# gold orchestration
 	gold clean-gold refresh-gold \
 	# full pipelines
@@ -121,6 +123,12 @@ gold-daily-electricity-profile:
 gold-latest-energy-day:
 	python -m src.gold.datasets.latest_energy_day.run
 
+gold-electricity-price-trends-monthly:
+	python -m src.gold.datasets.electricity_price_trends_monthly.run
+
+gold-nuclear-exit-context-monthly:
+	python -m src.gold.datasets.nuclear_exit_context_monthly.run
+
 
 # =========================
 # GOLD ORCHESTRATION
@@ -132,7 +140,9 @@ gold: \
 	gold-final-energy-consumption-by-sector \
 	gold-renewables-by-technology \
 	gold-daily-electricity-profile \
-	gold-latest-energy-day
+	gold-latest-energy-day \
+	gold-electricity-price-trends-monthly \
+	gold-nuclear-exit-context-monthly
 
 clean-gold:
 	rm -rf data/gold
