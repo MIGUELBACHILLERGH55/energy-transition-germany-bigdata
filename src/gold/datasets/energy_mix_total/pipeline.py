@@ -22,6 +22,8 @@ class EnergyMixTotal:
         return self.spark_session.read.parquet(f"{self.input_path}/table_id=6.1")
 
     def transform(self, df: DataFrame) -> DataFrame:
+        # Ensure year is numeric
+        df = df.withColumn("year", sf.col("year").cast("int"))
         # Add dataset name column for trazability
         df = df.withColumn("dataset", sf.lit("energy_mix_total"))
 

@@ -29,7 +29,11 @@ class FinalEnergyConsumptionBySector:
         return df
 
     def transform(self, df: DataFrame) -> DataFrame:
+        # Ensure year is numeric
+        df = df.withColumn("year", sf.col("year").cast("int"))
+
         # --------------------------------------------------
+
         # STEP 0: Dataset tag
         # --------------------------------------------------
         df = df.withColumn("dataset", sf.lit("final_energy_consumption_by_sector"))

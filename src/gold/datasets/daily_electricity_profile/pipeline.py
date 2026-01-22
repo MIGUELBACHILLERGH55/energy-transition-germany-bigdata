@@ -27,7 +27,7 @@ class DailyElectricityProfile:
         # --------------------------------------------------
         # STEP 1: Prepare base daily aggregates
         # --------------------------------------------------
-        df = df.withColumnRenamed("event_date_utc", "date")
+        df = df.withColumn("date", sf.to_date("event_date_utc"))
 
         df = df.groupBy("date").agg(
             sf.sum("load_act").alias("load_act_daily"),
