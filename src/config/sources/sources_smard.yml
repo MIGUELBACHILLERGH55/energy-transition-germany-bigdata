@@ -53,10 +53,27 @@ smard:
         silver:
           path: "smard/prices/" # Cleaned/structured version
           partitioning: ["data_date"]
-        gold:
-          path: "smard/prices_daily/" # Aggregated daily parquet
-          format: parquet
-          partitioning: ["yyyy", "mm", "dd"] # Hive-style directory partitioning
+
+    load:
+      enabled: true
+      request:
+        filter: 410
+        region: "DE"
+        resolution: "hour"
+      metadata:
+        dataset_id: "smard.load.hourly"
+        source_resolution: "hour"
+        granularity: hourly
+        tz: "Europe/Berlin"
+        schedule: daily
+      destinations:
+        landing:
+          path: "smard/load/" # Where raw JSON is stored (data/landing/ + this)
+        bronze:
+          path: "smard/load/" # Where raw JSON is stored (data/bronze/ + this)
+        silver:
+          path: "smard/load/" # Cleaned/structured version
+          partitioning: ["data_date"]
 
     # ==========================
     # Generation by technology
@@ -67,14 +84,14 @@ smard:
       request:
         filter: 1223
         region: "DE"
-        resolution: "hour"
+        resolution: "day"
       storage:
         file_naming: "smard_lignite_{yyyy}-{mm}-{dd}.json"
         format: "json"
       metadata:
-        dataset_id: "smard.generation.lignite.hourly"
-        source_resolution: "hour"
-        granularity: hourly
+        dataset_id: "smard.generation.lignite.daily"
+        source_resolution: "day"
+        granularity: daily
         tz: "Europe/Berlin"
         schedule: daily
         format: json
@@ -94,14 +111,14 @@ smard:
       request:
         filter: 1224
         region: "DE"
-        resolution: "hour"
+        resolution: "day"
       storage:
         file_naming: "smard_nuclear_energy_{yyyy}-{mm}-{dd}.json"
         format: "json"
       metadata:
-        dataset_id: "smard.generation.nuclear_energy.hourly"
-        source_resolution: "hour"
-        granularity: hourly
+        dataset_id: "smard.generation.nuclear_energy.daily"
+        source_resolution: "day"
+        granularity: daily
         tz: "Europe/Berlin"
         schedule: daily
         format: json
@@ -148,14 +165,14 @@ smard:
       request:
         filter: 1226
         region: "DE"
-        resolution: "hour"
+        resolution: "day"
       storage:
         file_naming: "smard_hydroelectricity_{yyyy}-{mm}-{dd}.json"
         format: "json"
       metadata:
         dataset_id: "smard.generation.hydroelectricity.hourly"
-        source_resolution: "hour"
-        granularity: hourly
+        source_resolution: "day"
+        granularity: daily
         tz: "Europe/Berlin"
         schedule: daily
         format: json
@@ -164,60 +181,6 @@ smard:
           path: "smard/generation/hydroelectricity/"
         bronze:
           path: "smard/generation/hydroelectricity/"
-        silver:
-          path: "smard/generation/"
-          partitioning: ["data_date"]
-          format: parquet
-
-    other_conventional:
-      enabled: true
-      access: api
-      request:
-        filter: 1227
-        region: "DE"
-        resolution: "hour"
-      storage:
-        file_naming: "smard_other_conventional_{yyyy}-{mm}-{dd}.json"
-        format: "json"
-      metadata:
-        dataset_id: "smard.generation.other_conventional.hourly"
-        source_resolution: "hour"
-        granularity: hourly
-        tz: "Europe/Berlin"
-        schedule: daily
-        format: json
-      destinations:
-        landing:
-          path: "smard/generation/other_conventional/"
-        bronze:
-          path: "smard/generation/other_conventional/"
-        silver:
-          path: "smard/generation/"
-          partitioning: ["data_date"]
-          format: parquet
-
-    other_renewables:
-      enabled: true
-      access: api
-      request:
-        filter: 1228
-        region: "DE"
-        resolution: "hour"
-      storage:
-        file_naming: "smard_other_renewables_{yyyy}-{mm}-{dd}.json"
-        format: "json"
-      metadata:
-        dataset_id: "smard.generation.other_renewables.hourly"
-        source_resolution: "hour"
-        granularity: hourly
-        tz: "Europe/Berlin"
-        schedule: daily
-        format: json
-      destinations:
-        landing:
-          path: "smard/generation/other_renewables/"
-        bronze:
-          path: "smard/generation/other_renewables/"
         silver:
           path: "smard/generation/"
           partitioning: ["data_date"]
@@ -229,14 +192,14 @@ smard:
       request:
         filter: 4066
         region: "DE"
-        resolution: "hour"
+        resolution: "day"
       storage:
         file_naming: "smard_biomass_{yyyy}-{mm}-{dd}.json"
         format: "json"
       metadata:
         dataset_id: "smard.generation.biomass.hourly"
-        source_resolution: "hour"
-        granularity: hourly
+        source_resolution: "day"
+        granularity: daily
         tz: "Europe/Berlin"
         schedule: daily
         format: json
@@ -311,14 +274,14 @@ smard:
       request:
         filter: 4069
         region: "DE"
-        resolution: "hour"
+        resolution: "day"
       storage:
         file_naming: "smard_hard_coal_{yyyy}-{mm}-{dd}.json"
         format: "json"
       metadata:
         dataset_id: "smard.generation.hard_coal.hourly"
-        source_resolution: "hour"
-        granularity: hourly
+        source_resolution: "day"
+        granularity: daily
         tz: "Europe/Berlin"
         schedule: daily
         format: json
@@ -327,33 +290,6 @@ smard:
           path: "smard/generation/hard_coal/"
         bronze:
           path: "smard/generation/hard_coal/"
-        silver:
-          path: "smard/generation/"
-          partitioning: ["data_date"]
-          format: parquet
-
-    pumped_storage:
-      enabled: true
-      access: api
-      request:
-        filter: 4070
-        region: "DE"
-        resolution: "hour"
-      storage:
-        file_naming: "smard_pumped_storage_{yyyy}-{mm}-{dd}.json"
-        format: "json"
-      metadata:
-        dataset_id: "smard.generation.pumped_storage.hourly"
-        source_resolution: "hour"
-        granularity: hourly
-        tz: "Europe/Berlin"
-        schedule: daily
-        format: json
-      destinations:
-        landing:
-          path: "smard/generation/pumped_storage/"
-        bronze:
-          path: "smard/generation/pumped_storage/"
         silver:
           path: "smard/generation/"
           partitioning: ["data_date"]
@@ -365,14 +301,14 @@ smard:
       request:
         filter: 4071
         region: "DE"
-        resolution: "hour"
+        resolution: "day"
       storage:
         file_naming: "smard_natural_gas_{yyyy}-{mm}-{dd}.json"
         format: json
       metadata:
         dataset_id: "smard.generation.natural_gas.hourly"
-        source_resolution: "hour"
-        granularity: hourly
+        source_resolution: "day"
+        granularity: daily
         tz: "Europe/Berlin"
         schedule: daily
         format: json
