@@ -16,6 +16,7 @@ class SmardTimeseriesDownloader(BaseDownloader):
         # 1. Prepare the endpoint
         self.filter = task.request_params["filter"]
         self.resolution = task.request_params["resolution"]
+        self.dataset_name = task.dataset_name
 
         # Set use_last_available flag
         self.use_last_available = task.use_last_available
