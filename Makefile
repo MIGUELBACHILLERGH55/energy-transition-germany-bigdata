@@ -70,7 +70,10 @@ gold-final-energy-consumption-by-sector:
 gold-renewables-by-technology:
 	python -m src.gold.datasets.renewables_by_technology.run
 
+gold-daily-electricity-profile:
+	python -m src.gold.datasets.daily_electricity_profile.run
 
-gold: bronze silver gold-energy-mix-total gold-energy-intensity-indicators gold-final-energy-consumption-by-sector gold-renewables-by-technology
+
+gold: bronze silver gold-energy-mix-total gold-energy-intensity-indicators gold-final-energy-consumption-by-sector gold-renewables-by-technology gold-daily-electricity-profile
 
 
