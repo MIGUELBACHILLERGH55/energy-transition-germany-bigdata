@@ -2,155 +2,242 @@
 
 ## Descripción general
 
-Este proyecto tiene como objetivo analizar la transición energética de Alemania a partir de fuentes de datos energéticos oficiales y públicas, mediante el diseño e implementación de un pipeline ETL con **Apache Spark**.
+Este proyecto analiza la transición energética de Alemania a partir de fuentes oficiales y públicas, mediante el diseño e implementación de un pipeline ETL completo con Apache Spark.
 
-El sistema permite extraer, transformar y estructurar datos energéticos reales para su posterior análisis, siguiendo una arquitectura **lakehouse** clara y mantenible.
+El sistema cubre todo el flujo de datos, desde la extracción hasta la generación de datasets analíticos listos para herramientas de BI, siguiendo una arquitectura lakehouse clara, reproducible y mantenible.
 
-Las fuentes utilizadas son organismos oficiales europeos y alemanes, garantizando la fiabilidad y trazabilidad de los datos.
+Las fuentes utilizadas son organismos oficiales europeos y alemanes, lo que garantiza fiabilidad, trazabilidad y rigor en los datos.
 
 ---
 
 ## Fuentes de datos
 
-### SMARD.de
-Datos horarios del sistema eléctrico alemán (generación, demanda y precios).
+SMARD.de
+Datos horarios del sistema eléctrico alemán:
 
-### AGEB
+* generación eléctrica
+* demanda (load)
+* precios de electricidad
+
+Fuente accesible vía API.
+
+AGEB
 Evaluation Tables of the Energy Balance for Germany (1990–2024).
 
-> **Nota:** se utilizan únicamente las *evaluation tables*, no los balances energéticos históricos completos.
+* Datos estructurales del sistema energético alemán
+* Consumo final, mix energético, intensidad energética
 
-### OPSD (Open Power System Data)
-Series temporales energéticas (2015–2020).
+Nota: se utilizan exclusivamente las evaluation tables, no los balances energéticos históricos completos.
+Fuente de tipo archivo (file).
 
-### EEA (European Environment Agency)
-Emisiones nacionales de gases de efecto invernadero (1985–2023).
+Eurostat
+Indicadores energéticos y económicos a nivel europeo:
+
+* índices de precios al consumidor relacionados con la energía
+* datos estandarizados y comparables a nivel UE
+
+Fuente de tipo archivo (file).
+
+OPSD (Open Power System Data)
+Series temporales energéticas:
+
+* generación y demanda eléctrica
+* datos históricos consolidados (2015–2020)
+
+Fuente de tipo archivo (file).
+
+EEA (European Environment Agency)
+Emisiones nacionales de gases de efecto invernadero:
+
+* series anuales oficiales
+* cobertura temporal 1985–2023
+
+Fuente de tipo archivo (file).
+
+---
+
+## Resumen de fuentes
+
+* Total de fuentes de datos: 5
+* Fuentes tipo archivo (file): AGEB, Eurostat, OPSD, EEA
+* Fuentes tipo API: SMARD
 
 ---
 
 ## Arquitectura del proyecto
 
-El proyecto sigue una arquitectura **lakehouse**, separando claramente las responsabilidades por capas:
+El proyecto sigue una arquitectura lakehouse, separando claramente las responsabilidades por capas:
 
 ```
 data/
 ├── landing/          # Datos originales descargados
 │   ├── smard/
 │   ├── ageb/
+│   ├── eurostat/
 │   ├── opsd/
 │   └── eea/
 ├── bronze/           # Datos raw materializados en Parquet
-│   └── opsd/
-└── silver/           # Datos transformados y limpios
-    └── opsd/
+├── silver/           # Datos transformados y normalizados
+└── gold/             # Datasets analíticos listos para BI
 ```
 
 ---
 
 ## Capas del lakehouse
 
-### Landing
+Landing
 Datos originales tal y como se descargan de las fuentes oficiales, sin modificaciones.
 
-### Bronze
-Persistencia de los datos en formato **Parquet** mediante Spark, sin aplicar lógica de negocio.
+Bronze
+Persistencia de los datos en formato Parquet mediante Spark, sin aplicar lógica de negocio.
+Objetivo: reproducibilidad, trazabilidad y separación clara respecto a las fuentes originales.
 
-### Silver
+Silver
 Transformación y limpieza de los datos:
-- Tipado correcto de columnas
-- Normalización temporal
-- Limpieza y estandarización
-- Estructura preparada para análisis
+
+* tipado correcto de columnas
+* normalización temporal
+* limpieza y estandarización
+* estructura consistente por fuente
+
+Esta capa sirve como base estable para análisis posteriores.
+
+Gold
+Capa analítica final, orientada a consumo directo en BI y análisis exploratorio.
+
+Incluye datasets sobre mix energético, precios, renovables, consumo final, perfiles diarios y contexto del cierre nuclear alemán.
+
+Todos los datasets Gold:
+
+* están en formato long
+* tienen tipado temporal consistente
+* incluyen unidades explícitas
+* son reproducibles mediante Makefile
+
+---
+
+## Datasets Gold (capa analítica)
+
+La siguiente tabla resume los datasets finales generados en la capa Gold.
+
+| Dataset                            | Fuente principal | Frecuencia         | Contenido       | Descripción                                                          |
+| ---------------------------------- | ---------------- | ------------------ | --------------- | -------------------------------------------------------------------- |
+| energy_mix_total                   | AGEB             | Anual              | Energía, share  | Mix energético total de Alemania y participación relativa por fuente |
+| energy_intensity_indicators        | AGEB             | Anual              | Indicadores     | Indicadores de intensidad energética agregados                       |
+| final_energy_consumption_by_sector | AGEB             | Anual              | Energía, share  | Consumo final de energía por sector económico                        |
+| renewables_by_technology           | AGEB             | Anual              | Energía         | Producción renovable desagregada por tecnología                      |
+| daily_electricity_profile          | OPSD             | Diario             | Energía, ratios | Perfil diario de carga, generación renovable y cuotas                |
+| latest_energy_day                  | SMARD            | Horaria (snapshot) | Load, price     | Último día completo disponible del sistema eléctrico alemán          |
+| electricity_price_trends_monthly   | SMARD / Eurostat | Mensual            | Precio          | Tendencias mensuales de precios eléctricos                           |
+| nuclear_exit_context_monthly       | SMARD            | Mensual            | Energía         | Contexto temporal del cierre nuclear (pre / post phase-out)          |
 
 ---
 
 ## Requisitos del sistema
 
-- Windows, macOS o Linux
-- Acceso a internet
-- **Java 11 o superior** (recomendado Java 17)
+* Windows, macOS o Linux
+* Acceso a internet
+* Java 11 o superior (recomendado Java 17)
 
-### Requisito obligatorio: Java
+Apache Spark se ejecuta sobre la Java Virtual Machine (JVM), por lo que Java es obligatorio incluso si el entorno Python se gestiona con Micromamba o Conda.
 
-Apache Spark se ejecuta sobre la **Java Virtual Machine (JVM)**, por lo que Java es obligatorio aunque el entorno Python se gestione con Micromamba o Conda.
-
-```bash
+```
 java -version
 ```
 
 ---
 
-## Entorno de ejecución (Micromamba — recomendado)
+## Entorno de ejecución (Micromamba recomendado)
 
-```bash
+```
 micromamba create -f environment.yml
 micromamba activate energy-trans-env
 ```
 
-> Micromamba gestiona las dependencias de Python, pero **no instala Java**.
+Micromamba gestiona las dependencias de Python, pero no instala Java.
 
 ---
 
 ## Ejecución del proyecto (Makefile)
 
-La ejecución del proyecto se gestiona exclusivamente mediante **make**, lo que garantiza reproducibilidad y simplicidad.
+La ejecución del proyecto se gestiona exclusivamente mediante make, garantizando reproducibilidad y simplicidad.
 
-### Extracción de datos (Landing)
+Extracción de datos (Landing)
 
-```bash
+```
 make extract-ageb
 make extract-eea
 make extract-opsd
+make extract-eurostat
 ```
 
 O todas a la vez:
 
-```bash
+```
 make bronze
 ```
 
-### Limpieza y regeneración de Bronze
+Regeneración de Bronze
 
-```bash
+```
 make refresh-bronze
 ```
 
-### Transformación a Silver
+Transformación a Silver
 
-```bash
+```
 make silver
 ```
 
 O por fuente:
 
-```bash
+```
 make transform-ageb
 make transform-eea
 make transform-opsd
+make transform-smard
+make transform-eurostat
 ```
 
-### Limpieza de Silver
+Generación de Gold
 
-```bash
-make clean-silver
+```
+make gold
+```
+
+O datasets individuales:
+
+```
+make gold-energy-mix-total
+make gold-electricity-price-trends-monthly
+make gold-nuclear-exit-context-monthly
+```
+
+Rebuild completo desde cero
+
+```
+make refresh-all
 ```
 
 ---
 
-## Estado actual del proyecto
+## Estado del proyecto
 
-**Versión:** v0.1.0
+Versión actual: v1.0.0
 
-Incluye actualmente:
-- Capa de extracción modular por fuente
-- Capa Bronze funcional con Spark
-- Pipelines de transformación a Silver
-- Arquitectura desacoplada (extract / transform / IO)
-- Orquestación completa mediante Makefile
+La versión 1.0.0 marca un primer release estable que incluye:
+
+* pipeline ETL completo (extract → bronze → silver → gold)
+* capa Gold estable y reproducible
+* datasets analíticos listos para BI
+* normalización temporal consistente
+* orquestación completa mediante Makefile
+
+A partir de esta versión, el proyecto evoluciona de forma incremental.
 
 ---
 
 ## Autores
 
-- **Tomás Morales**
-- **Miguel Bachiller Segovia**
+Tomás Morales
+Miguel Bachiller Segovia
