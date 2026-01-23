@@ -19,7 +19,7 @@ class EnergyMixTotal:
             return resolve_output_path(proj_config, dataset_cfg, "silver")
 
     def read_inputs(self) -> DataFrame:
-        return self.spark_session.read.parquet(f"{self.input_path}/table_id=6.1")
+        return self.spark_session.read.parquet(f"{self.input_path}/table_id=1.1")
 
     def transform(self, df: DataFrame) -> DataFrame:
         # Ensure year is numeric
