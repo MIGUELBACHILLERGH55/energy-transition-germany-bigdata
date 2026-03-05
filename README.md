@@ -1,219 +1,133 @@
-# Energy Transition Germany — Big Data Project
+<p align="center">
+  <img src="assets/logo.png" width="900">
+</p>
 
-## Descripción general
+<p align="center">
+  Germany Energy Transition — Data Engineering Pipeline
+</p>
 
-Este proyecto analiza la transición energética de Alemania a partir de fuentes oficiales y públicas, mediante el diseño e implementación de un pipeline ETL completo con Apache Spark.
-
-El sistema cubre todo el flujo de datos, desde la extracción hasta la generación de datasets analíticos listos para herramientas de BI, siguiendo una arquitectura lakehouse clara, reproducible y mantenible.
-
-Las fuentes utilizadas son organismos oficiales europeos y alemanes, lo que garantiza fiabilidad, trazabilidad y rigor en los datos.
-
----
-
-## Fuentes de datos
-
-SMARD.de
-Datos horarios del sistema eléctrico alemán:
-
-* generación eléctrica
-* demanda (load)
-* precios de electricidad
-
-Fuente accesible vía API.
-
-AGEB
-Evaluation Tables of the Energy Balance for Germany (1990–2024).
-
-* Datos estructurales del sistema energético alemán
-* Consumo final, mix energético, intensidad energética
-
-Nota: se utilizan exclusivamente las evaluation tables, no los balances energéticos históricos completos.
-Fuente de tipo archivo (file).
-
-Eurostat
-Indicadores energéticos y económicos a nivel europeo:
-
-* índices de precios al consumidor relacionados con la energía
-* datos estandarizados y comparables a nivel UE
-
-Fuente de tipo archivo (file).
-
-OPSD (Open Power System Data)
-Series temporales energéticas:
-
-* generación y demanda eléctrica
-* datos históricos consolidados (2015–2020)
-
-Fuente de tipo archivo (file).
-
-EEA (European Environment Agency)
-Emisiones nacionales de gases de efecto invernadero:
-
-* series anuales oficiales
-* cobertura temporal 1985–2023
-
-Fuente de tipo archivo (file).
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11-blue">
+  <img src="https://img.shields.io/badge/Apache_Spark-ETL-orange">
+  <img src="https://img.shields.io/badge/Architecture-Lakehouse-green">
+</p>
 
 ---
 
-## Resumen de fuentes
+## Overview
 
-* Total de fuentes de datos: 5
-* Fuentes tipo archivo (file): AGEB, Eurostat, OPSD, EEA
-* Fuentes tipo API: SMARD
+This project analyzes the German energy transition using official public datasets.
+
+A complete **ETL pipeline with Apache Spark** was implemented to transform heterogeneous energy data into structured analytical datasets suitable for analysis and business intelligence.
+
+The system follows a **lakehouse architecture**, ensuring reproducibility, traceability and a clear separation between raw data, transformations and analytical outputs.
+
+The resulting datasets enable the exploration of:
+
+- the evolution of Germany’s energy mix
+- renewable expansion by technology
+- electricity market price dynamics
+- nuclear phase-out context
+- energy consumption by sector
 
 ---
 
-## Arquitectura del proyecto
+## Architecture
 
-El proyecto sigue una arquitectura lakehouse, separando claramente las responsabilidades por capas:
+The project follows a lakehouse architecture separating raw ingestion, transformation and analytical layers.
+
+```mermaid
+flowchart LR
+A[Landing<br>Raw Sources] --> B[Bronze<br>Raw Parquet]
+B --> C[Silver<br>Clean & Structured]
+C --> D[Gold<br>Analytical Datasets]
+D --> E[Analysis & BI]
+```
+
+---
+
+## Data Sources
+
+| Source   | Type | Content                                                 |
+| -------- | ---- | ------------------------------------------------------- |
+| SMARD    | API  | German electricity generation, demand and market prices |
+| AGEB     | File | German energy balances and structural indicators        |
+| Eurostat | File | European energy price indicators                        |
+| OPSD     | File | Historical electricity generation and demand            |
+| EEA      | File | National greenhouse gas emissions                       |
+
+All sources are official European or German institutions, ensuring data reliability and traceability.
+
+---
+
+## Project Structure
 
 ```
 data/
-├── landing/          # Datos originales descargados
-│   ├── smard/
-│   ├── ageb/
-│   ├── eurostat/
-│   ├── opsd/
-│   └── eea/
-├── bronze/           # Datos raw materializados en Parquet
-├── silver/           # Datos transformados y normalizados
-└── gold/             # Datasets analíticos listos para BI
+├── landing/          # Raw data from sources
+├── bronze/           # Raw datasets materialized in Parquet
+├── silver/           # Cleaned and normalized datasets
+└── gold/             # Analytical datasets ready for analysis
 ```
 
 ---
 
-## Capas del lakehouse
+## Analytical Datasets (Gold Layer)
 
-Landing
-Datos originales tal y como se descargan de las fuentes oficiales, sin modificaciones.
+| Dataset                            | Source           | Frequency       | Description                                          |
+| ---------------------------------- | ---------------- | --------------- | ---------------------------------------------------- |
+| energy_mix_total                   | AGEB             | Annual          | Total German energy mix and relative share by source |
+| energy_intensity_indicators        | AGEB             | Annual          | Aggregated energy efficiency indicators              |
+| final_energy_consumption_by_sector | AGEB             | Annual          | Final energy consumption by sector                   |
+| renewables_by_technology           | AGEB             | Annual          | Renewable production by technology                   |
+| daily_electricity_profile          | OPSD             | Daily           | Electricity load and renewable share                 |
+| latest_energy_day                  | SMARD            | Hourly snapshot | Latest full day of electricity system data           |
+| electricity_price_trends_monthly   | SMARD / Eurostat | Monthly         | Electricity price trends                             |
+| nuclear_exit_context_monthly       | SMARD            | Monthly         | Nuclear phase-out context                            |
 
-Bronze
-Persistencia de los datos en formato Parquet mediante Spark, sin aplicar lógica de negocio.
-Objetivo: reproducibilidad, trazabilidad y separación clara respecto a las fuentes originales.
-
-Silver
-Transformación y limpieza de los datos:
-
-* tipado correcto de columnas
-* normalización temporal
-* limpieza y estandarización
-* estructura consistente por fuente
-
-Esta capa sirve como base estable para análisis posteriores.
-
-Gold
-Capa analítica final, orientada a consumo directo en BI y análisis exploratorio.
-
-Incluye datasets sobre mix energético, precios, renovables, consumo final, perfiles diarios y contexto del cierre nuclear alemán.
-
-Todos los datasets Gold:
-
-* están en formato long
-* tienen tipado temporal consistente
-* incluyen unidades explícitas
-* son reproducibles mediante Makefile
+All datasets are stored in **long format with consistent temporal typing and explicit units**.
 
 ---
 
-## Datasets Gold (capa analítica)
+## Analytical Insights
 
-La siguiente tabla resume los datasets finales generados en la capa Gold.
+### Energy Mix Evolution
 
-| Dataset                            | Fuente principal | Frecuencia         | Contenido       | Descripción                                                          |
-| ---------------------------------- | ---------------- | ------------------ | --------------- | -------------------------------------------------------------------- |
-| energy_mix_total                   | AGEB             | Anual              | Energía, share  | Mix energético total de Alemania y participación relativa por fuente |
-| energy_intensity_indicators        | AGEB             | Anual              | Indicadores     | Indicadores de intensidad energética agregados                       |
-| final_energy_consumption_by_sector | AGEB             | Anual              | Energía, share  | Consumo final de energía por sector económico                        |
-| renewables_by_technology           | AGEB             | Anual              | Energía         | Producción renovable desagregada por tecnología                      |
-| daily_electricity_profile          | OPSD             | Diario             | Energía, ratios | Perfil diario de carga, generación renovable y cuotas                |
-| latest_energy_day                  | SMARD            | Horaria (snapshot) | Load, price     | Último día completo disponible del sistema eléctrico alemán          |
-| electricity_price_trends_monthly   | SMARD / Eurostat | Mensual            | Precio          | Tendencias mensuales de precios eléctricos                           |
-| nuclear_exit_context_monthly       | SMARD            | Mensual            | Energía         | Contexto temporal del cierre nuclear (pre / post phase-out)          |
+![Energy mix](assets/graphs/energy_mix.jpg)
+
+Renewables have steadily expanded since the early 2000s, progressively replacing coal and nuclear generation in Germany’s energy system.
 
 ---
 
-## Requisitos del sistema
+### Electricity Market Prices
 
-* Windows, macOS o Linux
-* Acceso a internet
-* Java 11 o superior (recomendado Java 17)
+![Electricity prices](assets/graphs/electricity_price.jpg)
 
-Apache Spark se ejecuta sobre la Java Virtual Machine (JVM), por lo que Java es obligatorio incluso si el entorno Python se gestiona con Micromamba o Conda.
-
-```
-java -version
-```
+Electricity prices remained relatively stable for many years before experiencing strong volatility during the European energy crisis.
 
 ---
 
-## Entorno de ejecución (Micromamba recomendado)
+### Renewable Generation by Technology
 
-```
-micromamba create -f environment.yml
-micromamba activate energy-trans-env
-```
+![Renewables by technology](assets/graphs/renewables_tech.jpg)
 
-Micromamba gestiona las dependencias de Python, pero no instala Java.
+Wind power dominates renewable electricity generation, followed by biomass and solar, illustrating the technological composition of Germany’s renewable expansion.
 
 ---
 
-## Ejecución del proyecto (Makefile)
+## Reproducibility
 
-La ejecución del proyecto se gestiona exclusivamente mediante make, garantizando reproducibilidad y simplicidad.
+The entire ETL pipeline can be reproduced using the provided **Makefile**.
 
-Extracción de datos (Landing)
-
-```
-make extract-ageb
-make extract-eea
-make extract-opsd
-make extract-eurostat
-```
-
-O todas a la vez:
+Example workflow:
 
 ```
 make bronze
-```
-
-Regeneración de Bronze
-
-```
-make refresh-bronze
-```
-
-Transformación a Silver
-
-```
 make silver
-```
-
-O por fuente:
-
-```
-make transform-ageb
-make transform-eea
-make transform-opsd
-make transform-smard
-make transform-eurostat
-```
-
-Generación de Gold
-
-```
 make gold
 ```
 
-O datasets individuales:
-
-```
-make gold-energy-mix-total
-make gold-electricity-price-trends-monthly
-make gold-nuclear-exit-context-monthly
-```
-
-Rebuild completo desde cero
+To rebuild the entire pipeline:
 
 ```
 make refresh-all
@@ -221,23 +135,10 @@ make refresh-all
 
 ---
 
-## Estado del proyecto
+## Authors
 
-Versión actual: v1.0.0
-
-La versión 1.0.0 marca un primer release estable que incluye:
-
-* pipeline ETL completo (extract → bronze → silver → gold)
-* capa Gold estable y reproducible
-* datasets analíticos listos para BI
-* normalización temporal consistente
-* orquestación completa mediante Makefile
-
-A partir de esta versión, el proyecto evoluciona de forma incremental.
-
----
-
-## Autores
-
-Tomás Morales
-Miguel Bachiller Segovia
+|                                                                |                                                                     |
+| :------------------------------------------------------------: | :-----------------------------------------------------------------: |
+| <img src="https://github.com/Tomasmoralessp.png" width="140"/> | <img src="https://github.com/MIGUELBACHILLERGH55.png" width="140"/> |
+|                    **Tomás Morales Galván**                    |                    **Miguel Bachiller Segovia**                     |
+|      [@Tomasmoralessp](https://github.com/Tomasmoralessp)      |   [@MIGUELBACHILLERGH55](https://github.com/MIGUELBACHILLERGH55)    |
